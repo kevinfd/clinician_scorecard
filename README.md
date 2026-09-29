@@ -2,7 +2,41 @@
 
 A per-surgeon metrics viewer for a neurosurgery department: volume and mix, efficiency, access, quality and outcomes, patient experience, and citizenship. Every number links to its definition and to the records behind it; every record is credited to exactly one clinician and can be disputed; numbers built on too few cases say why instead of showing a blank; peer comparisons are anonymous; every metric shows a trend.
 
-This repository holds the product definition, not code. Read the documents in order.
+This repository holds the product definition (`docs/`) and a working Next.js implementation that deploys to Vercel from this repo. The deployed app runs on a synthetic department only.
+
+## The app
+
+A Next.js 16 app at the repository root implements the scorecard on a deterministic synthetic department: 14 neurosurgeons at two sites, about two years of OR cases, admissions, clinic visits, survey responses with comments, wRVUs, block days and M&M attendance. Every name, case and comment is invented.
+
+What works:
+
+- **All 25 metrics from the brief**, with their cadences (monthly, quarterly, rolling 12 months, fiscal year), minimum n, peer groups, and the brief's wording on every definition page.
+- **Suppression that says why** (min-n, peer group under five, not applicable, source pending, hidden survey month), never a blank.
+- **Anonymous peer spread** as a strip plot of sorted values with "You" marked, and a text table under every chart.
+- **Record lists** behind every number, CSV export, and a dispute button on every disputable row.
+- **Disputes end to end**: filed by the surgeon, routed to the division chief or to the chair when the chief is involved, decided with a note, and applied as an adjudicated value beside the logged one. Re-credited cases move to the other surgeon.
+- **Patient feedback inbox** with private notes, visible to the surgeon and their direct leader only, with the leader seeing each month 30 days later.
+- **Views by role**: surgeon, division chief (queue), chair, site lead (direct reports), department analyst (period close: reconciliation, suppression counts, dispute aging).
+- **The M1 plain-text email** preview for each surgeon and month.
+- The visual system from `DESIGN.md`: Atkinson Hyperlegible Next (self-hosted), two inks, ruled rows, tabular figures, a night scheme, no red, 44px targets.
+
+Sign-in is a demo identity picker; in the department it is single sign-on. Code lives in `app/` (pages and server actions), `src/lib/` (synthetic data, metric definitions, engine, disputes, storage) and `src/components/`.
+
+```bash
+npm install
+npm run dev        # http://localhost:3000
+npm test           # engine rules: suppression, peer spread, routing, overrides, display contracts
+npm run build
+```
+
+## Deploying to Vercel
+
+1. In Vercel, choose **Add New > Project** and import `kevinfd/clinician_scorecard`. Vercel detects Next.js; keep the defaults (root directory `.`, build `next build`).
+2. Deploy. Every push to the connected branch redeploys, and pull requests get preview URLs.
+3. Optional: add the **Upstash Redis** integration from the Vercel Marketplace. It sets `KV_REST_API_URL` and `KV_REST_API_TOKEN`, and disputes, decisions and notes become shared across everyone using the deployment. Without it they live in each browser's cookies.
+4. Optional: set `DEMO_PASSCODE` in the project's environment variables to require a passcode before anyone can pick an identity.
+
+Do not load real surgeon or patient data into this deployment. The technical design keeps real data on an MGB-managed server behind MGB single sign-on; this app is the product and design reference for that build.
 
 ## Documents
 
@@ -43,7 +77,7 @@ Frontend design goes through `/impeccable` (shape, build, critique, harden, onbo
 
 ## Status
 
-PRD version 0.9, status DRAFT, pending human approval. Reviewed by `/plan-ceo-review`, `/plan-design-review`, `/impeccable` and `/plan-eng-review`, all headless; no review grants approval and the eng review, the shipping gate, reads issues_open. No application code exists. Before the M1 build starts a human must decide, in one sitting (the full list is "Approval readiness" in `docs/reviews/plan-eng-review.md`):
+PRD version 0.9, status DRAFT, pending human approval. Reviewed by `/plan-ceo-review`, `/plan-design-review`, `/impeccable` and `/plan-eng-review`, all headless; no review grants approval and the eng review, the shipping gate, reads issues_open. The Vercel app implements the surfaces on synthetic data; the M1 build against real feeds has not started. Before it starts a human must decide, in one sitting (the full list is "Approval readiness" in `docs/reviews/plan-eng-review.md`):
 
 - The eng review's architecture decisions D1 to D8 and the outside voice's accepted rows R-138 to R-144: keep or reverse each; D1 (engine lock), D6 (recipient second source), R-138 (a missing report row stops the run) and R-140 (a published spread is withheld when its peer set changes) are the ones a surgeon could notice.
 - The Taste items carried from every review: R-61's visible target date; TD-03, TD-04, TD-06, TD-09, TD-13; the face and accent (OQ-63) and the night scheme in `DESIGN.md`; T-01, T-03, T-06, T-10 from the CEO review; TE-03 and the M1 operating surface (TE-D1, TE-D2) from the eng review.
