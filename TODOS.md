@@ -25,3 +25,6 @@ Deferred scope collected by `/plan-eng-review` (2026-09-29, headless) from the C
 | 19 | Decision-by-reply authenticity inside MGB mail | CEO L-18 | information security | technical design "M1 intake" |
 | 20 | Off-host location for the M1 dump and audit export | OQ-61 | information security | technical design "Backups and the restore drill" |
 | 21 | Whether QI-derived rows are peer-review privileged (M6) | OQ-62 | medical staff office | technical design "Roles, grants, restricted and privileged schemas" |
+| 22 | A per-dispute one-time token in the adjudicator email's subject, required in the decision reply (eng outside voice TE-06); the derived sender kind ships without it (R-141) | eng review, outside voice; CEO L-18 | information security | technical design "M1 intake"; `disputes/intake.py` |
+| 23 | Whether "last refreshed" should stay unchanged on an email published under `--publish-empty` (R-142 keeps R-86's meaning: the publish date) | eng outside voice TE-08 | definitions owner, analyst | PRD R-86, R-142 |
+| 24 | Narrowing the grants check (G17) to per-stage invariants on `load`, `close` and dispute commands, after the first three closes' exit-4 counts (R-144) show whether benign drift ever stopped a close | eng outside voice TE-12 | builder, after three closes | technical design "Gates" G17; `scorecard grants check` |

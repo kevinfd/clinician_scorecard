@@ -29,6 +29,7 @@ M1 has no pages. Its surfaces are the monthly email and CSV, the acknowledgement
 | `tests/engine/test_purity.py` | unit | no definition imports I/O or reads comments | static scan | ★★ |
 | `tests/engine/test_invariants.py` | integration | row count equals denominator; no blank cell; unfilled placeholder fails | synth with one link row removed | ★★★ |
 | `tests/engine/test_close_dry_run.py` | integration | `--dry-run` writes nothing; unended month refused; published period refused without `--restate` | synth | ★★★ |
+| `tests/engine/test_registry_refusal.py::test_recompute_without_tree_file` | integration | with the tree file removed, a same-version recompute runs from the registry's stored source and the definition page renders it; a stored source whose hash differs from the registered hash is refused (R-13, TE-05) | fixture with `v1.py` deleted | ★★ |
 | `tests/engine/test_recompute.py` | integration | delay reason 6 of 10 both bases; re-credit 6 of 10 versus 6 of 9; receiver's volume rises; min-n clause; restatement rows | the J2 ten-case fixture | ★★★ |
 | `tests/engine/test_recompute_version.py` | integration | only the changed metric and only effective periods; boundary marker | `fcot@v2` fixture | ★★★ |
 | `tests/engine/test_recompute_roster.py` | integration | snapshots rebuilt from the change date; as-of template; `roster_change` restatement | a site move mid-quarter | ★★ |
@@ -42,6 +43,7 @@ M1 has no pages. Its surfaces are the monthly email and CSV, the acknowledgement
 |---|---|---|---|---|
 | `tests/engine/test_suppression_order.py` | unit | rank order; exact strings per key; unfilled placeholder fails | one cell per kind | ★★★ |
 | `tests/engine/test_peers.py` | integration | viewer excluded; opt-out both directions; non-attendee kept; 4 versus 5 clearing; two-site rows; month one nothing; sole peer; no peer id in payload | synth roster variants | ★★★ |
+| `tests/engine/test_peers.py::test_republished_spread_never_differs_by_one_member` | integration | a roster change or opt-out dated inside a published period rebuilds that period's snapshot with `spread-group-changed` and no values; an unpublished period rebuilds normally; a dispute recompute with the same clearing set rebuilds values (R-140, R-41, TE-03) | published period plus a later opt-out | ★★★ |
 | `tests/engine/test_availability.py` | unit | pending, not in release, not applicable, registered from its period only | source registry fixtures | ★★ |
 
 ### Reconciliation and period close (F-79 to F-84, F-112; M1)
@@ -49,8 +51,9 @@ M1 has no pages. Its surfaces are the monthly email and CSV, the acknowledgement
 | Test | Type | Proves | Fixture | Target |
 |---|---|---|---|---|
 | `tests/engine/test_reconcile.py` | integration | unexplained stops; delta explains; re-credit explains adjudicated; delay reason explains nothing; brief assumption does not reconcile; skip refused for a reported metric; missing report holds; field override explained as `sustained_override` | synth periop report | ★★★ |
-| `tests/loaders/test_feed_health.py` | integration | empty extract gives reasons and no values; short extract stops unless accepted with a note | empty and truncated files | ★★★ |
-| `tests/loaders/test_field_checklist.py` | integration | removing one column marks exactly its dependents | synth minus `wheels_in` | ★★ |
+| `tests/engine/test_reconcile.py::test_missing_surgeon_row_stops_run` | integration | a roster surgeon with no `periop_report` row for a reported metric writes `unexplained` with `clinician_unmapped` and stops the run; a metric with zero report rows writes `not_reconciled`; an unmapped `clinician_raw` lands on the exception list (R-138, TE-01) | synth report with one surgeon's row deleted | ★★★ (CRITICAL) |
+| `tests/loaders/test_feed_health.py` | integration | empty extract gives reasons and no values; short extract stops unless accepted with a note; `test_site_denominator_drop`: a site FCOT denominator under 70% of the trailing three loaded months stops `close` unless accepted, and month one passes (R-139); `test_partial_mark_on_tile`: after acceptance every wedge tile and the footer carry `partial-extract`, the flag is on run and delivery, and the next what-changed block reports the restatement (R-85); `test_publish_empty_flag`: no wedge value stops `close` and `publish` unless `--publish-empty --note`, and the email under the flag uses the R-129 preview line (R-142) | empty, truncated and tail-truncated files | ★★★ |
+| `tests/loaders/test_field_checklist.py` | integration | removing one column marks exactly its dependents; `test_all_null_required_column`: an all-null `wheels_in` marks FCOT "not computable" with the null rate on the checklist (R-139, TE-02) | synth minus `wheels_in`; synth with `wheels_in` blank | ★★★ |
 | `tests/publish/test_last_refreshed.py` | unit | closed-not-published keeps the prior date | two periods | ★★ |
 | `tests/publish/test_status.py` | unit | each deadline; two recipients; day-10 surgeon string; stuck runs; pending decision emails; freeze time | frozen clock | ★★★ |
 | `tests/e2e/test_runbook_page1.py` | E2E | load, roster, close dry-run, close, publish dry-run, publish send (stubbed relay), overrides, status: every gate, every scan, row counts, email order, `published_at` once, elapsed time under target | synth department, 12 surgeons, 14 months | ★★★ (CRITICAL) |
@@ -61,12 +64,12 @@ M1 has no pages. Its surfaces are the monthly email and CSV, the acknowledgement
 |---|---|---|---|---|
 | `tests/disputes/test_state.py` | unit | every legal transition; every illegal triple; trigger state equals last event; third filing refused; decide after decide refused | enumerated | ★★★ |
 | `tests/disputes/test_route.py` | unit | tests a, b, c; chair on own record held; no chief mapped held; survey flag on and off | one fixture per branch | ★★★ |
-| `tests/disputes/test_intake.py` | unit | no case id awaiting row; colleague's id refused; second reply attaches; acknowledgement text with who decides and the due date | reply fixtures | ★★★ |
+| `tests/disputes/test_intake.py` | unit | no case id awaiting row; colleague's id refused; second reply attaches; acknowledgement text with who decides and the due date; `test_sender_kind_derived`: `reply log` sets `sender_kind` from the ingested message's envelope sender and stores the header hash, a typed sender without `--override-sender --note` is refused, an override appears on the trust report and G18 fails a typed sender with no note (R-141, TE-06) | reply fixtures; `.eml` fixtures with relay headers | ★★★ |
 | `tests/disputes/test_decide.py` | unit | empty note; note with an identifier; wrong actor; sustained without outcome; receiver not on roster; source corrected without a contact | one per validation | ★★★ |
 | `tests/ops/test_state_trigger_grants.py` | integration | filing as role `disputes` sets state; direct UPDATE of state refused | fresh database | ★★ |
 | `tests/disputes/test_rowtext.py` | unit | every key; target date; withdrawn; refile sentence; decision email before and after rows | fixtures | ★★ |
 | `tests/disputes/test_provenance.py`, `test_notify.py` | unit | missing field blocks and flags; receiver email content; no value of anyone | fixtures | ★★ |
-| `tests/disputes/test_queue.py` | unit | day 10 and 14; trust report column set; no text columns | fixtures | ★★ |
+| `tests/disputes/test_queue.py` | unit | day 10 and 14; trust report column set; no text columns; `test_chair_report_has_no_clinician_column`: the chair-facing report selects no clinician column and no per-surgeon row, the analyst report keeps them under `analyst_ro`, no send path exists for it (R-102, TE-09) | fixtures | ★★★ |
 
 ### Delivery and notifications (F-90 to F-94, F-106; M1)
 
@@ -78,7 +81,7 @@ M1 has no pages. Its surfaces are the monthly email and CSV, the acknowledgement
 | `tests/publish/test_what_changed.py` | unit | decision, each restatement category with both values, version change, new-case count, "No changes since" | fixtures | ★★★ |
 | `tests/publish/test_preview_diff.py` | unit | suppressed to shown; spread on to off; peer count changed; no change | two periods | ★★★ |
 | `tests/publish/test_scan.py` | unit | MRN column blocked; long cell blocked; allowlisted passes; a year in a procedure name blocked then allowlisted by exact cell with an audit row | fixtures | ★★★ |
-| `tests/publish/test_own_records.py`, `test_gates.py`, `test_what_this_is_not.py` | unit | another surgeon's ref fails; four of five gates leaves the fifth refused; a rank line fails | fixtures | ★★★ |
+| `tests/publish/test_own_records.py`, `test_gates.py`, `test_what_this_is_not.py` | unit | another surgeon's ref fails; four of five gates leaves the fifth refused; a rank line fails; `test_gates.py::test_one_unresolved_address`: one directory mismatch writes `delivery.status = 'blocked'` with a reason code, the other 39 send, `published_at` is written, the blocked surgeon's page renders `period-not-published-for-you` with the directory sentence and the surgeon stays on the checklist until `--resend` (R-135, TE-11) | fixtures; one unresolved address | ★★★ |
 | `tests/publish/test_directory.py` | integration | mismatch against the last delivery blocks one surgeon; unreachable exits 4 keeping sent rows; first send passes; typed address refused | stubbed `directory.py` | ★★★ |
 | `tests/publish/test_send_resume.py` | integration | fail at 20 of 40 then resume 20; `--send` twice sends 0; `.eml` manifest; `--record-eml-sent`; NDR sets bounce; `--resend` after identity fix | stubbed `transport.py` | ★★★ |
 | `tests/publish/test_overrides.py` | unit | one list per feed owner; only unconfirmed rows; prior months included | fixtures | ★★ |
@@ -92,6 +95,8 @@ M1 has no pages. Its surfaces are the monthly email and CSV, the acknowledgement
 |---|---|---|---|---|
 | `tests/ops/test_audit_immutable.py`, `test_audit_export_chain.py`, `test_grants_drift.py`, `test_runtime_not_owner.py` | integration | UPDATE and DELETE raise; a broken chain fails recertification; an extra GRANT exits 4; a superuser login fails doctor | fresh database | ★★★ |
 | `tests/ops/test_gate_confirm.py` | unit | same identity refused; unconfirmed gate opens nothing | settings | ★★ |
+| `tests/ops/test_audit_export_auto.py`, `tests/ops/test_doctor.py::test_export_age_by_setting` | integration | a writing command appends an export batch at exit when `audit_export_location` is set and none when unset; `doctor` warns on export and dump age while the setting is unset and fails once set; the runbook and the email gate's reference carry the trusted-operator sentence (R-143, TE-10) | fresh database; setting on and off | ★★ |
+| `tests/ops/test_grants_repair.py` | integration | an extra GRANT exits 4 with the runbook line; `grants repair` re-applies `roles.sql`, writes the audit row and the next command passes; a run that exited 4 carries the condition and `resolved_by` after a later success (R-144, TE-12) | fresh database with one added grant | ★★ |
 | `tests/ops/test_retention_unset.py` | integration | unset classes change nothing; a set class holds rows referenced by an open dispute or unconfirmed override | fixtures | ★★★ |
 | `tests/ops/test_migrations_fresh.py`, `test_migrations_replay.py`, `test_restore_roundtrip.py`, `test_doctor.py` | integration | fresh apply; replay on the prior tag; dump and restore give one identical cell; listener and TLS checks | fresh database | ★★ |
 | `tests/test_no_secrets.py`, `test_fixtures_synthetic.py` | unit | no credential patterns; every fixture carries the SYNTHETIC header | tree scan | ★ |
@@ -122,6 +127,12 @@ M1 has no pages. Its surfaces are the monthly email and CSV, the acknowledgement
 - A procedure name containing a year, `=HYPERLINK(...)`, `<`, `&` or emoji.
 - A 21-row first-case list (the body cap); a 47-character procedure name; a 45-character surgeon name.
 - A superseding periop load after publish, with and without a restate.
+- A required column present in the header and empty in every row; a site whose first-case denominator falls to half of the trailing three months.
+- A roster surgeon absent from periop's report while the metric is reported; a metric periop does not report at all.
+- An opt-out recorded after a period was published; a roster change dated inside a published period.
+- A decision reply from an address that is not the adjudicator of record; a typed sender kind with and without a note.
+- A period with no wedge value at all, with and without `--publish-empty`.
+- One surgeon's directory address unresolved while the other 39 send.
 - A definition file edited in place (refused); a `v2` registered with an overlapping window (refused).
 - M2: a URL with another surgeon's `record_ref`; a double-click on decide; navigating away during the recompute; a 30-minute idle session with a typed claim; two tabs deciding the same dispute.
 
@@ -129,7 +140,7 @@ M1 has no pages. Its surfaces are the monthly email and CSV, the acknowledgement
 
 1. Runbook page 1 end to end on the synthetic department (`tests/e2e/test_runbook_page1.py`): the shipping unit's whole path.
 2. The engine writer lock (`tests/engine/test_ordering.py`): the one critical gap.
-3. Reconciliation on both bases (`tests/engine/test_reconcile.py`): the product's reconcile-do-not-compete promise.
+3. Reconciliation on both bases and on a missing report row (`tests/engine/test_reconcile.py`, including `test_missing_surgeon_row_stops_run`): the product's reconcile-do-not-compete promise and the outside voice's blocking finding TE-01.
 4. Payload scan, own-records and channel gates (`test_scan.py`, `test_own_records.py`, `test_gates.py`): nothing leaves the pipeline unscanned or ungated.
 5. The dispute state machine and routing (`test_state.py`, `test_route.py`): the product.
 6. The first-send rehearsal (manual, R-82): the synthetic month-one and month-two emails through the real relay to both operators' phones, in three mail clients, with the find-and-copy task timed.
@@ -137,5 +148,6 @@ M1 has no pages. Its surfaces are the monthly email and CSV, the acknowledgement
 ## Pending Decisions
 
 - Taste items held for the human (unchanged by this review): the "target decision by" date on the row (R-61); the late-case decomposition line (TD-03); per-tile provenance versus footer (TD-04); sorted peer values versus range and median (TD-06); the record table versus cards at phone width (TD-09); a plain surgeon-facing name (TD-13); the face and accent (OQ-63); the night scheme with M2; the wRVU mirror tile before M5 (T-06); zero-tolerance reconciliation versus a threshold (T-03); M1 as a script and a sheet (T-01).
-- Owner questions that block a test from being final: OQ-61 (the off-host location the restore drill restores from); the decision-by-reply authenticity (information security); the whole-month-leave email (definitions owner); the MRN pattern and incident procedure (privacy office, OQ-58).
+- Outside-voice close (eng): tests M23 to M33 above are added, none deferred; the frozen peer set on published periods (R-140) is taken provisionally and is a taste item for the human, so `test_republished_spread_never_differs_by_one_member` is the test that changes if the human reverses it.
+- Owner questions that block a test from being final: OQ-61 (the off-host location the restore drill restores from); the decision-by-reply authenticity (information security), now including whether a per-dispute subject token is required (R-141); the whole-month-leave email (definitions owner); the MRN pattern and incident procedure (privacy office, OQ-58).
 - Framework choice (D-05, Flask or Django) changes the M2 test harness's fixtures, not the assertions.
