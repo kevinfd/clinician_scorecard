@@ -15,6 +15,10 @@ This repository currently holds the product definition, not code. Read the docum
 | 4 | [docs/03-technical-design.md](docs/03-technical-design.md) | Technical design: architecture, data model, definitions-as-code, suppression and peer groups, dispute workflow, security, operations. |
 | 5 | [docs/PRD.md](docs/PRD.md) | The source PRD for building the application. Consolidates 1 to 4 and carries the gstack review record (CEO, design, eng). |
 | 6 | [docs/reviews/](docs/reviews/) | gstack plan reviews applied to the PRD: `/plan-ceo-review`, `/plan-design-review`, `/plan-eng-review`. |
+| 7 | [PRODUCT.md](PRODUCT.md) | `/impeccable init`: the durable product record (users, purpose, positioning, the six ground rules and other constraints, terminology surgeons see, evidence on hand, voice, accessibility, open decisions). Inferred facts are marked for confirmation. |
+| 8 | [DESIGN.md](DESIGN.md) | `/impeccable` new-work seed: the visual world ("The OR list and the pen"), tokens, type, colour with a night scheme, spacing, focus ring, motion policy, the component inventory with states, chart and table rules, and the reconciliation with the design review's token proposal (R-120). Proposal until a human approves a face and an accent. |
+| 9 | [docs/design/briefs/](docs/design/briefs/) | `/impeccable shape`: one surface brief each for the M1 plain-text email and the M2 web app, with the direction contract, realistic data ranges and states. |
+| 10 | [docs/reviews/impeccable-design.md](docs/reviews/impeccable-design.md) | `/impeccable` critique, clarify, onboard and harden applied to PRD section 9 and the technical design's delivery surfaces, with the copy pass and the review log of every amendment made to the PRD and the technical design. |
 
 ## How these documents were produced
 
@@ -30,6 +34,8 @@ Install gstack (see `CLAUDE.md`), then from this repo:
 4. `/plan-eng-review docs/PRD.md` to lock architecture and produce the test plan. This is the gate before code.
 5. `/spec` per feature ID (F-xx) to file executable issues.
 6. Build, then `/review`, `/qa`, `/ship`.
+
+Frontend design goes through `/impeccable` (shape → build → critique → harden → onboard → clarify → audit → polish), reading `PRODUCT.md`, `DESIGN.md` and the surface brief for the page being built.
 
 ## Status
 

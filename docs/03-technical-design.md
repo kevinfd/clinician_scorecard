@@ -2959,35 +2959,61 @@ scorecard publish --period 2026-10 [--dry-run | --send | --eml]
 
 #### The plain-text template
 
-The body is plain text, 72 characters wide at most, no hyperlink in months one to three (F-90 AC 3), tiles in the brief's bucket order, one blank line between blocks. Everything in angle brackets is filled from the artifact model; everything else is literal. Suppression, spread and page-state wording comes from the catalogue by key and is never typed in the template (F-33 AC 5).
+The body is plain text, 72 characters wide at most, no hyperlink in months one to three (F-90 AC 3), tiles in the brief's bucket order, one blank line between blocks. Everything in angle brackets is filled from the artifact model; everything else is literal. Suppression, spread and page-state wording comes from the catalogue by key and is never typed in the template (F-33 AC 5). The order, the envelope and the grammar are the PRD's (R-116, R-122, R-123, R-124; section 9.6): no ruler line anywhere (R-94: no run of five or more `=` or `-`, because a ruler wraps on a phone and a screen reader announces it as a count of symbols), headings as one upper-case line followed by a blank line, indentation at most four spaces, one fact per line, the case id first on every record row. Amended 2026-09-29 by the impeccable pass (`docs/reviews/impeccable-design.md`) to match the PRD; the earlier form of this block, with rulers and separate post-tile decision and definition blocks, is superseded.
 
 ```
-Subject: Your scorecard, October 2026 (last refreshed 12 November 2026)
+Subject: Your October 2026 scorecard and case list, from <analyst name>
+From:    <analyst name>, Department of Neurosurgery <service mailbox>
+Reply-To: <dispute mailbox>
 
-Clinician Scorecard for <Dr. Name>
+Four numbers from periop's OR log and your own case list.
+Only you receive this email.
+
+Clinician Scorecard for Dr. <Name>
 October 2026 at <site label>
 last refreshed 12 November 2026
 
-This email carries your own numbers and your own case list, and
-nothing else. Your case list is attached as scorecard-2026-10.csv.
-To dispute any row, reply to this email and quote the row's case id
-(the code in the case_id column, for example C-7K3Q9M). Describe the
-record by its case id and what happened; do not include a patient's
-name, MRN or date of birth. Replies go to <dispute mailbox address>
-and are read by the department analyst.
-
 <what-this-is-not one-line text, statement version v<n>>
 
-======================================================================
+Your first cases and cancellations are below; the full list is
+attached as scorecard-2026-10.csv. To dispute a row, see "How to
+dispute" below.
+
+FIRST MONTHLY EMAIL
+
+First monthly email. Four numbers from periop's OR log for October,
+and your own case list. Only you receive this email; your chief or
+chair sees one of your rows only when you dispute it.
+
+THIS MONTH
+
+OR case volume: 19 operations as primary surgeon
+First-case on-time start (FCOT): 5 of 7 first cases on time (71%)
+  Of the 2 late: 1 your delay, 1 not your delay (both counted under
+  periop's definition)
+Duration estimate accuracy: 11 of 14 cases within tolerance (79%)
+Same-day cancellations you could have prevented: Counted quarterly;
+  the quarter closes 31 December 2026. Scheduled cases so far: 24.
+
+YOUR FIRST CASES AND CANCELLATIONS
+
+C-2B8XT1  2026-10-03  on time
+C-7K3Q9M  2026-10-14  late  not your delay (anesthesia)
+C-5PW2ZR  2026-10-20  late  your delay (surgeon late)
+C-9QL4WD  2026-10-21  cancelled same day  <reason as stored>; not in
+  your set
+Full list attached (7 first cases, 3 cancellations).
+To dispute a row, reply with its case id (first on the line) and what
+happened. The template is under How to dispute.
+
 BUCKET 1  VOLUME AND MIX
-======================================================================
 
 OR case volume
-  October: 19 operations as primary surgeon. Trend: 12 months.
+  October: 19 operations as primary surgeon.
+  Records: 19 rows in the attachment under OR case volume
   Compared to: surgeons in your subspecialty at your site
     (4 surgeons; spread from month two)
-  Definition: OR case volume, version 1 (brief v0.2)
-  Records: 19 rows in the attachment, metric = or_case_volume
+  definition v1; source periop OR log; as of 12 November 2026
   Trend (operations as primary surgeon, closed months)
     2025-11   17
     2025-12   14
@@ -2995,46 +3021,49 @@ OR case volume
     ...
     2026-10   19
 
-======================================================================
 BUCKET 2  EFFICIENCY
-======================================================================
 
 First-case on-time start (FCOT)
   October: 5 of 7 first cases on time (71%).
-  Definition: institutional FCOT, version 1 (periop).
-    Reconciled to periop's October report.
+  Of the 2 late: 1 your delay, 1 not your delay (both counted under
+    periop's definition)
+  Records: 7 rows in the attachment under First-case on-time start
+    (FCOT)
   Compared to: neurosurgeons at your site
     (9 surgeons; spread from month two)
-  Records: 7 rows in the attachment, metric = fcot
+  definition v1; source periop OR log; as of 12 November 2026
   Trend (first cases on time / first cases, closed months)
     2025-11   83%   5/6
     2025-12   Not shown: 3 first cases this month; needs at least 4
     2026-01   80%   4/5
     ...
-    2026-09   86%   6/7 *
+    2026-09   86%   6/7   restated after your dispute on case C-3H8VQ2;
+      as logged 71% 5/7
     2026-10   71%   5/7
-  * restated on 2026-11-12 (dispute D-0014); as logged 71% 5/7
 
 Duration estimate accuracy
-  October: 11 of 14 cases within tolerance (79%). Needs at least 5 cases.
+  October: 11 of 14 cases within tolerance (79%). Needs at least 5
+    cases.
+  Records: 14 rows in the attachment under Duration estimate accuracy
   Compared to: subspecialty peers at your site
     (4 surgeons; spread from month two)
-  Definition: Duration estimate accuracy, version 1 (brief v0.2)
-  Records: 14 rows in the attachment, metric = duration_accuracy
+  definition v1; source periop OR log; as of 12 November 2026
   Trend (cases within tolerance / cases, closed months)
     ...
 
 Block utilization (only if you have allocated block)
-  Not in this release: needs the block allocation and release schedule;
-  owner not yet named
+  Not in this release: needs the block allocation and release
+  schedule; no owner of that data has been named yet
 
 Same-day cancellations you could have prevented
   Counted quarterly; the quarter closes 31 December 2026.
   Scheduled cases so far this quarter: 24.
+  3 same-day cancellations so far; 1 in the surgeon-attributable set
+  Records: 3 rows in the attachment under Same-day cancellations you
+    could have prevented
   Compared to: neurosurgeons at your site
     (9 surgeons; spread from month two)
-  Definition: Same-day cancellations you could have prevented,
-    version 1 (periop)
+  definition v1; source periop OR log; as of 12 November 2026
   Trend (cancellations counted / scheduled cases, closed quarters)
     history from 2025-10
     2025-Q4   1.6%   1/61
@@ -3046,75 +3075,75 @@ OR turnover time, PACU boarding and room-ready delays are not on any
 individual scorecard because a surgeon cannot move them alone. They
 will appear only on division and site views.
 
-======================================================================
 BUCKETS 3 TO 6
-======================================================================
-  Not in this release: needs <feed>; owner not yet named
-  (one line per metric, in the brief's order, from the source registry)
 
-======================================================================
-DECISIONS ON YOUR DISPUTES SINCE THE LAST EMAIL
-======================================================================
-  C-7K3Q9M  Dispute sustained (annotated) by division chief on
-            2026-11-03: delay reason corrected to anesthesia;
-            correction requested at periop 2026-11-12.
-  (or: "None.")
+Buckets 3 to 6 are not in this release. Each metric's definition and
+the feed it needs are on the definition pages below.
+<the metric names, in the brief's order, one line each>
 
-======================================================================
-DEFINITION CHANGES
-======================================================================
-  First-case on-time start (FCOT) definition changed from v1 to v2
-  effective November: institutional grace window confirmed. The
-  boundary is marked on your trend.
-  (or: "None this period.")
+HOW TO DISPUTE
 
-======================================================================
+Reply to this email with three lines:
+Case id: (the first token on the row, for example C-7K3Q9M)
+What is wrong: delay reason / on time / not my case / cancellation
+  reason / something else
+What happened: (describe the record by its case id; do not include a
+  patient's name, MRN or date of birth)
+
+How a dispute proceeds: your division chief decides, or the chair if
+the chief is involved. The target is 14 days. The decision is one of:
+sustained, not sustained, or a definition question. A sustained
+decision corrects the row or credits the case to the right surgeon;
+the reason you gave and the decision stay on the row. Periop is asked
+to correct its record; until it does, both values show.
+
 DEFINITIONS IN FORCE THIS PERIOD
-======================================================================
-  <for each tile: the definition page text rendered by
-   `scorecard definitions page <metric>@<version>`: What, Counted,
-   Compared to, Shown as, You can move it by, recorded assumptions
-   with status, reason sets in force or pending, version history>
 
-----------------------------------------------------------------------
-Sent by the Department of Neurosurgery scorecard pipeline from
-<department mailbox>. Reply to dispute a record or to ask a question.
+<for each tile: the definition page text rendered by
+ `scorecard definitions page <metric>@<version>`: What, Counted,
+ Compared to, Shown as, You can move it by, recorded assumptions
+ with status, reason sets in force or pending, version history>
+
+Source: periop OR log, reconciled to periop's October report.
+Sent by <analyst name> from the department mailbox; reply to dispute
+or ask a question.
 ```
 
-Month-two variant. When `self_only` is false and a group renders, each tile with a comparator gains the three lines of F-46 AC 6 immediately under the comparator line, in the metric's unit, peers sorted ascending, nothing else:
+Month-two variant. The FIRST MONTHLY EMAIL block is replaced, in the same slot, by WHAT CHANGED SINCE SEPTEMBER 2026 (R-115): decisions on the surgeon's own disputes since the last email (each as its row text, F-59), restatements with both values (R-98), definition version changes ("First-case on-time start (FCOT) definition changed from v1 to v2 effective November: institutional grace window confirmed. The boundary is marked on your trend."), and the count of new records; "No changes since September 2026." when nothing changed. The two blocks never render together (a test fails on both or neither). When `self_only` is false and a group renders, each tile with a comparator gains the three lines of F-46 AC 6 immediately under the comparator line, in the metric's unit, the "You" line first (R-48), peers sorted ascending, nothing else:
 
 ```
   Neurosurgeons at your site: 7 peers, each with at least 4 first
-    cases (you are not counted). Your position marked.
-  Peers: 43%, 57%, 60%, 67%, 75%, 80%, 86%
+    cases. Names are hidden, not people.
   You: 71%
+  Peers: 43%, 57%, 60%, 67%, 75%, 80%, 86%
 ```
 
-When the group does not render, the comparator line ends with the catalogue text instead: `Peer comparison not shown: 4 peers in your subspecialty at this site cleared at least 5 cases this month; needs 5 (you are not counted)`. In month one every comparator line ends `(spread from month two)` and no email contains a `Peers:` line (F-90 AC 4, F-35 AC 1); a test scans every month-one body for the string `Peers:` and fails on a hit.
+When the group does not render, the comparator line ends with the catalogue text instead: `Peer comparison not shown: only 4 other neurosurgeons at this site had 5 or more cases this month; 5 are needed for a comparison` (R-125, as reworded by the impeccable pass); when the surgeon is the only member of the group, `Peer comparison not shown: you are the only neurosurgeon in your subspecialty at this site` (`sole-peer`, R-129). In month one every comparator line ends `(spread from month two)` and no email contains a `Peers:` line (F-90 AC 4, F-35 AC 1); a test scans every month-one body for the string `Peers:` and fails on a hit.
 
 Suppressed tile (F-32 AC 3, F-49 AC 3):
 
 ```
 First-case on-time start (FCOT)
   October: Not shown: 3 first cases this month; needs at least 4
-  Records: 3 rows in the attachment, metric = fcot
+  Records: 3 rows in the attachment under First-case on-time start
+    (FCOT)
 ```
 
-The tile keeps its records line because the list opens even when the number is suppressed, and the row count equals the count in the reason.
+The tile keeps its records line because the list opens even when the number is suppressed, and the row count equals the count in the reason. When no first case was credited, the reason reads `Not shown: no first cases were credited to you in October; needs at least 4`. When no tile in the email carries a value, the two preview lines read `Your October case list from periop's OR log. Only you receive this email.` (R-129) so the preview promises nothing the body cannot show.
 
 As logged and as adjudicated (F-47 AC 1, AC 5), only when they differ:
 
 ```
-  October: as logged 60% (6 of 10); as adjudicated 67% (6 of 9).
+  October: as logged 60% (6 of 10) · as adjudicated 67% (6 of 9).
   Records: 9 rows counted as adjudicated; 10 rows in the attachment
     (the re-credited row reads "not counted (re-credited)")
 ```
 
-Trend table rules (F-43, F-108 AC 1): one row per closed period, vertical, so the widest line stays under 72 characters on a phone; up to 12 monthly rows, up to four quarterly rows, four rolling-12 rows for In-hospital mortality (O/E) when that metric ships; a period with no value carries its `gap_reason` text in place of a number; `*` marks a restated point with a legend line naming the dispute or cause (F-96 AC 2); a line `--- definition v2 from 2027-01 ---` marks a version boundary; `history from <date>` appears once above the first real row when the window is longer than the history (F-43 AC 2). No zero-filled or interpolated rows.
+Trend table rules (F-43, F-108 AC 1, R-45): one row per closed period, vertical, so the widest line stays under 72 characters on a phone; up to 12 monthly rows, up to four quarterly rows, four rolling-12 rows for In-hospital mortality (O/E) when that metric ships; a period with no value carries its `gap_reason` text in place of a number; a restated row appends `restated <cause>` where the cause names the surgeon's own case id ("restated after your dispute on case C-3H8VQ2"), never a dispute id (R-126); a line `--- definition v2 from 2027-01 ---` marks a version boundary; `history from <date>` appears once above the first real row when the window is longer than the history (F-43 AC 2). No zero-filled or interpolated rows. A record row or trend row that must wrap at 72 characters continues on the next line indented two further spaces, so a continuation cannot be read as a new row (R-129).
 
-The "what this is not" one-line text (F-42 AC 2) is the catalogue entry `what-this-is-not-line`, versioned with the statement; the current statement version reads: "This scorecard is not a comp input, not a rank and not an OPPE record. It is visible to you; your chief sees a record only when you dispute it; no leader view exists in the pilot; disputes change the record list." The publish scan fails an artifact that lacks it.
+The "what this is not" one-line text (F-42 AC 2) is the catalogue entry `what-this-is-not-line`, versioned with the statement; the current statement version reads: "Not a comp input, not a rank, not an OPPE record. Only you see it. Your chief sees one of your records only when you dispute it. No leader view exists in the pilot. A dispute changes your record list." The publish scan fails an artifact that lacks it.
 
-Definitions appendix: F-90 says one attachment and F-50 AC 7 says the definition text is in the email months' artifact, so the definitions ride in the body, after the tiles, rendered from the registry by version (Builder decision S-5). A surgeon who reads on a phone sees the tiles first and the definitions last.
+Definitions appendix: F-90 says one attachment and F-50 AC 7 says the definition text is in the email months' artifact, so the definitions ride in the body, after the tiles, rendered from the registry by version (Builder decision S-5). A surgeon who reads on a phone sees the tiles first and the definitions last. Whether the full text must ride in every email or only in month one and on a version change is an open question for the catalogue owner (PRD 16.7).
 
 #### The CSV of the surgeon's own rows
 
@@ -3122,7 +3151,7 @@ One file, `scorecard-<period>.csv`, UTF-8 with BOM (so iOS and Android mail clie
 
 | Column | Type | Source | Notes |
 |---|---|---|---|
-| `metric` | text | tile | `or_case_volume`, `fcot`, `duration_accuracy`, `same_day_cancel` |
+| `metric` | text | tile | The metric name as the brief writes it (`OR case volume`, `First-case on-time start (FCOT)`, `Duration estimate accuracy`, `Same-day cancellations you could have prevented`), never the engine key (R-126); the email's records line names the same words |
 | `period` | text | tile | `2026-10` or `2026-Q4` |
 | `case_id` | text | `ledger.record.record_ref` | The id the surgeon quotes in a reply (F-54 AC 3, AC 5) |
 | `date` | date | `src.case.date_of_surgery` | |
@@ -3247,9 +3276,9 @@ The app reads the same `ledger` rows `publish` read; for any surgeon and period 
 | URL | Page | Viewer | Milestone | What it shows | Features |
 |---|---|---|---|---|---|
 | `/` | Redirect to `/me` | any roster identity | M2 | | |
-| `/me` and `/me/<period>` | Scorecard home | surgeon (self) | M2 | Period picker (closed periods only, F-84); "last refreshed"; the six buckets as sections in the brief's order with every tile in compact form (value or reason, comparator line, definition stamp); the F-104 text in bucket 2; the "what this is not" line in the footer | F-42, F-43, F-44, F-45, F-46, F-47, F-83, F-84, F-104 |
+| `/me` and `/me/<period>` | Scorecard home | surgeon (self) | M2 | Period picker (closed periods only, F-84); "last refreshed"; the what-changed aside (R-115), which carries `first-hosted-visit` when `audit_log` holds no prior `view` by this identity and `run-missed` when the expected period has not published (R-127); the six buckets as sections in the brief's order with every tile in compact form (value or reason, comparator line, definition stamp, the records link with its open-dispute count); the F-104 text in bucket 2; the "what this is not" line in the footer | F-42, F-43, F-44, F-45, F-46, F-47, F-83, F-84, F-104 |
 | `/me/<period>/bucket/<n>` | Bucket page | surgeon | M2 | Full tiles for one bucket; for bucket 5 the Patient experience layout (below) | F-69 (bucket 5) |
-| `/me/<period>/metric/<metric_key>` | Metric tile | surgeon | M2 | Value or reason; as logged / as adjudicated when they differ; comparator line and peer count; spread chart with the three-line text form beneath it; trend chart with the vertical text table beneath it; definition stamp linking to the definition page; source and as-of line; "Records: <n> rows" link; for wRVU and M&M the kind-specific block | F-34, F-43, F-46, F-47, F-51, F-97, F-77, F-74 |
+| `/me/<period>/metric/<metric_key>` | Metric tile | surgeon | M2 | Value or reason; as logged / as adjudicated when they differ; comparator line and peer count; spread chart with the three-line text form beneath it; trend chart with the vertical text table beneath it; definition stamp linking to the definition page; source and as-of line; "Records: <n> rows" link, reading "Records: <n> rows (<k> disputed)" while any dispute the viewer filed on that list is open (R-127; the count is the viewer's own, never a peer's); for wRVU and M&M the kind-specific block | F-34, F-43, F-46, F-47, F-51, F-97, F-77, F-74 |
 | `/me/<period>/metric/<metric_key>/records` | Record list | surgeon | M2 | Table with the CSV columns for the record type; row count in the heading equals the denominator; a "Dispute this record" button on every row; dispute state text on the row; opens for suppressed metrics; sortable by column header without JavaScript (query string) | F-49, F-54, F-59, F-53 (survey) |
 | `/records/<record_ref>` | Record detail | credited surgeon; adjudicator of an open dispute on it; receiving clinician after a re-credit | M2 | The row's columns, provenance block, every dispute ever filed on it in order with states (F-62 AC 1), the re-file control when allowed | F-52, F-59, F-62 |
 | `/records/<record_ref>/dispute` | Dispute form (GET shows, POST files) | credited surgeon only | M2 | Record identity, metrics fed, disputable-field selector limited by F-04, claim text (or the structured survey form), the F-56 effect notice above the submit control; on submit: `disputes.file()` then redirect to `/disputes/<id>` | F-66, F-56, F-58, F-72 (M4) |
@@ -3353,6 +3382,7 @@ Chart rules, enforced by `tests/web/test_charts.py`:
 - O/E and rate charts draw the interval; a bar chart of point estimates for those metrics fails the test (design doc Constraints, F-24).
 - Restated points carry a marker and a legend; version boundaries a vertical rule with version ids (F-96 AC 2).
 - Ghosted series (wRVU last year, prior snapshot) use a hatched fill and a legend entry, not a lighter tint alone.
+- Strokes, marker sizes and shapes follow `DESIGN.md` (Rule stroke 1.5 px; 12 px hollow peer circles; the surgeon as a 12 px filled square; restated points as filled diamonds). On a strip plot, tied peer values stack vertically to a cap of four; a fifth tied value thickens the marker's stroke and the text table carries the count ("4 peers at 75%").
 - Charts carry `role="img"` and an `aria-describedby` pointing at the text table.
 
 #### Empty, loading, error and suppressed states per page
@@ -3362,7 +3392,7 @@ There is no client-side loading state: pages are server-rendered in one request.
 | Page | No published period | Identity not on roster | Suppressed cell | Not authorized | Load failure | Empty (legitimately nothing) |
 |---|---|---|---|---|---|---|
 | Home, bucket, tile | `no-period`: "No period has been published yet. The first period publishes after <date>." | `not-on-roster`: "No scorecard: your identity is not on the department roster as of today. Contact <analyst mailbox>." | The catalogue reason text in the value position; the tile keeps its comparator line, definition stamp and records link (F-32 AC 4, F-49 AC 3) | `not-authorized` | `load-failure`: "The page could not be loaded. Your data has not changed. Try again or contact <analyst mailbox>." | A tile whose metric is `not_in_release` or `pending_source` renders that reason; never a blank (F-44) |
-| Record list | `no-period` | `not-on-roster` | List renders with the same columns and dispute buttons; heading "3 rows (Not shown: 3 first cases this month; needs at least 4)" | `not-authorized` | `load-failure` | Zero rows only when the denominator is 0 and the feed loaded: "0 rows; the October extract loaded with no cases credited to you" (F-14 AC 3); a failed feed renders `feed-not-received` instead |
+| Record list | `no-period` | `not-on-roster` | List renders with the same columns and dispute buttons; heading "3 rows (Not shown: 3 first cases this month; needs at least 4)" | `not-authorized` | `load-failure` | Zero rows only when the denominator is 0 and the feed loaded: "No rows: the October extract loaded and credited no cases to you" (F-14 AC 3, wording per R-126); a failed feed renders `feed-not-received` instead |
 | Dispute form | n/a (a record implies a period) | `not-on-roster` | n/a | `not-authorized` (record not yours, F-66 AC 4) | `load-failure` | Field selector empty is impossible: a record type with no disputable field has no button (F-56 AC 1) |
 | Dispute detail | n/a | `not-on-roster` | n/a | `not-authorized` | `load-failure` | Survey dispute: "Comment withheld: shown only to the direct leader of record" in the comment position for other adjudicators (F-72 AC 5) |
 | Queue | "No open disputes routed to you." | `not-on-roster` | n/a | `not-authorized` (not a chief or chair) | `load-failure` | "No open disputes routed to you." with the closed list link |
@@ -3373,7 +3403,9 @@ There is no client-side loading state: pages are server-rendered in one request.
 
 Every state string above is a catalogue key rendered by `reasons.render()`; a template that types one of these strings fails `tests/web/test_state_strings.py`, which greps `web/templates` for the literal texts.
 
-Error handling: an unhandled exception renders `load-failure` with a correlation id, writes an `audit_log` row `outcome = 'error'` and an application log line with ids only (no names, procedures, comments, claims). No stack trace reaches the browser. The database connection uses a statement timeout of 10 seconds; a timeout is a `load-failure`, never a partial table.
+Wording fixed by the impeccable pass (PRD section 9.4, R-126, R-127; `docs/reviews/impeccable-design.md`): `not-authorized` reads "This page is not available to you. If you think it should be, contact <analyst mailbox>." and is the same bytes whether the resource is another surgeon's or does not exist; `period-not-published-for-you` takes its reason from a fixed set of catalogue sentences ("your roster entry ended before this period"; "your identity could not be matched to the directory"; "the publish for this period was held"), never from `run` text; `run-missed` ("The November scorecard has not been published yet. This page shows October, last refreshed 12 November 2026.") renders in the what-changed aside when `today` is past the expected publish date for the next period and no publish run exists; `first-hosted-visit` ("First visit. This page shows the same numbers as your October email, plus the records behind each one and a dispute button on every row.") renders once, decided by the absence of a prior `view` row for the identity. The dispute form shows "A dispute on this field is already open (filed <date>). What you write here is added to it." when an open dispute exists on the record and field, and its POST is idempotent on that triple (R-128). The record detail adds "You may file once more on this record with new evidence." under a not-sustained decision while the re-file is allowed (F-62).
+
+Error handling: an unhandled exception renders `load-failure` with a correlation id shown on the page as "Reference <8 characters>" so a surgeon can quote it to the analyst (R-129), writes an `audit_log` row `outcome = 'error'` and an application log line with ids only (no names, procedures, comments, claims). No stack trace reaches the browser. The database connection uses a statement timeout of 10 seconds; a timeout is a `load-failure`, never a partial table.
 
 #### Accessibility baseline
 
@@ -3381,7 +3413,8 @@ The institution's standard is OQ-51; the floor that does not depend on it (F-108
 
 - Semantic HTML: one `h1` per page, `h2` per bucket, `h3` per tile; tables with `<th scope>` and a `<caption>` naming the metric and period; forms with `<label for>`.
 - Every state, marker and interval is text on the page, not only colour, icon or position: suppressed cells are the reason sentence; restated points carry "restated" in the text table; the viewer's marker has the label "You"; "no evidence of difference" is a sentence (F-24).
-- Colour contrast 4.5:1 for text; charts use two shapes plus text, not two hues.
+- Colour contrast 4.5:1 for text; charts use two shapes plus text, not two hues. Colours, faces, sizes, the focus ring and every component's states are the tokens and inventory in `DESIGN.md` at the repository root (R-120); every template cites a component name from it.
+- CI renders every page at 360 px and 1280 px, and at 1280 px under 200% zoom; a `forced-colors` rule set gives tables and the dispute-state cell 1 px `CanvasText` borders so structure survives Windows high-contrast mode (R-129).
 - Keyboard: every button and link reachable in order; skip link to the tile list; the dispute form submits with Enter.
 - No JavaScript required to read, navigate, file a dispute, decide, or write a note.
 - Phone width: single column at 360 px, tables scroll inside their own container, tiles stack; nothing is hidden at narrow width (F-108 AC 3). Desktop-first per the design doc; both widths tested with a headless browser screenshot per page.
@@ -3502,7 +3535,7 @@ No peer comparison.
 Records: 12 rows (every session scheduled this fiscal year)
 ```
 
-The pace line is one of exactly three strings from F-75 AC 2 and AC 3, computed in the definition version and stored on the `metric_value` row's `extra` field, never in the template: `On pace for <T> of <S>`; `Off pace`; `Cannot reach <T> this year` rendered as a flagged line with the word "Flag:" in front so the flag is text, not colour. When leave applies: `Target scaled to <T'> (assumption, to be confirmed)` with the formula, k, S' and T' on the definition page and in the record list header (F-75 AC 3, F-50 AC 6). Session record list columns: date, held yes/no, scan present/absent, removed by leave yes/no, counted yes/no (F-74 AC 2), dispute button per row with disputable fields `scan present` and `removed by leave` (F-76 AC 1). The trend is cumulative attended against cumulative held per month (F-74 AC 5, OQ-25). Never count-suppressed; no peer count (F-74 AC 4).
+The pace line is one of exactly three strings from F-75 AC 2 and AC 3, computed in the definition version and stored on the `metric_value` row's `extra` field, never in the template: `On pace for <T> of <S>`; `Off pace`; `<T> of <S> cannot be reached this year: <r> sessions remain and <T - a> are needed` rendered as its own line in the text colour at value size, so the flag is counts and words, not colour (R-129). When leave applies: `Target adjusted for your leave: <a> of <T'> (this adjustment is not yet confirmed; see the definition page)` (R-125) with the formula, k, S' and T' on the definition page and in the record list header (F-75 AC 3, F-50 AC 6). Session record list columns: date, held yes/no, scan present/absent, removed by leave yes/no, counted yes/no (F-74 AC 2), dispute button per row with disputable fields `scan present` and `removed by leave` (F-76 AC 1). The trend is cumulative attended against cumulative held per month (F-74 AC 5, OQ-25). Never count-suppressed; no peer count (F-74 AC 4).
 
 ### The optional BI pub contract (deferred)
 
@@ -4876,3 +4909,5 @@ Two audits were applied on 2026-09-29: a traceability and internal-consistency p
 | S-12 | Mail-policy dependencies unnamed; NDRs returned full case lists into the dispute mailbox | minor | ACCEPT | TA-14 records the no-external-forwarding, MDM and Exchange-retention assumptions and ties them to the privacy-email gate reference; `Return-Path` moved to the service mailbox, and `ingest-ndr` deletes the NDR after recording the bounce |
 
 Counts: 32 findings; 31 accepted, 1 partial (S-06), 0 rejected.
+
+2026-09-29, `/impeccable` (critique, harden, onboard, clarify; planning-only): the "Delivery surfaces" section was amended in place (the plain-text template rewritten to the PRD's order and grammar, the CSV `metric` column, the page inventory's records link and home aside, the states paragraph, the accessibility and chart bullets, the M&M strings). The full list is the Review log in `docs/reviews/impeccable-design.md`. The Metric engine section's catalogue table still prints the pre-R-125 peer-under-five template text; the PRD (section 9.4) is the current wording and the table is due a version when the catalogue is registered.
