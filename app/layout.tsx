@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource/atkinson-hyperlegible-next/400.css";
-import "@fontsource/atkinson-hyperlegible-next/500.css";
-import "@fontsource/atkinson-hyperlegible-next/600.css";
+import { Suspense } from "react";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
+import { TourProvider } from "@/components/tour/TourProvider";
+import { buildTours } from "@/lib/tours";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,20 +12,17 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export const viewport: Viewport = {
-  width: "device-width",
-  initialScale: 1,
-  colorScheme: "light dark",
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#eceef2" },
-    { media: "(prefers-color-scheme: dark)", color: "#1d232d" },
-  ],
-};
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#ffffff" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
+      <body className="font-sans text-slate-700 antialiased">
+        {children}
+        <Suspense fallback={null}>
+          <TourProvider tours={buildTours()} />
+        </Suspense>
+      </body>
     </html>
   );
 }

@@ -628,6 +628,8 @@ export const BUCKETS: Record<number, { name: string; intro: string }> = {
   6: { name: "Citizenship", intro: "Objectively logged obligations tied to the compensation plan." },
 };
 
+export const SECTION_SLUG: Record<number, string> = { 1: "volume", 2: "efficiency", 3: "access", 4: "quality", 5: "experience", 6: "citizenship" };
+
 export const DIVISION_ONLY = ["OR turnover time", "PACU boarding", "Room-ready delays"];
 
 export type { Person };

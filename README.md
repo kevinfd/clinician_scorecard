@@ -18,9 +18,10 @@ What works:
 - **Patient feedback inbox** with private notes, visible to the surgeon and their direct leader only, with the leader seeing each month 30 days later.
 - **Views by role**: surgeon, division chief (queue), chair, site lead (direct reports), department analyst (period close: reconciliation, suppression counts, dispute aging).
 - **The M1 plain-text email** preview for each surgeon and month.
-- The visual system from `DESIGN.md`: Atkinson Hyperlegible Next (self-hosted), two inks, ruled rows, tabular figures, a night scheme, no red, 44px targets.
+- **Guided tours** of the four user journeys (month posted, dispute a record, what patients said, close the month), launched from the home page. Each tour spotlights one part of the page at a time and switches identity when the journey changes hands.
+- The visual system in `DESIGN.md` (revision 2, NeuroScore family): Geist, slate canvas, white cards, teal for you and for action, violet for external references, no verdict colors.
 
-Sign-in is a demo identity picker; in the department it is single sign-on. Code lives in `app/` (pages and server actions), `src/lib/` (synthetic data, metric definitions, engine, disputes, storage) and `src/components/`.
+Sign-in is a demo identity picker (home page or the switcher at top right); in the department it is single sign-on. Code lives in `app/` (pages and server actions), `src/lib/` (synthetic data, metric definitions, engine, disputes, storage) and `src/components/`.
 
 ```bash
 npm install
@@ -49,7 +50,7 @@ Do not load real surgeon or patient data into this deployment. The technical des
 | 4 | [docs/03-technical-design.md](docs/03-technical-design.md) | Technical design: architecture, data model, definitions as code, suppression and peer groups, dispute workflow, security, operations. |
 | 5 | [docs/PRD.md](docs/PRD.md) | The PRD a team builds from. Consolidates 1 to 4 and carries the gstack review record (appendix D). |
 | 6 | [PRODUCT.md](PRODUCT.md) | `/impeccable init`: the durable product record (users, purpose, ground rules, terminology, voice, accessibility, open decisions). Inferred facts are marked for confirmation. |
-| 7 | [DESIGN.md](DESIGN.md) | `/impeccable` new-work seed: the visual world, tokens, type, colour with a night scheme, components with states, chart and table rules. A proposal until a human approves a face and an accent. |
+| 7 | [DESIGN.md](DESIGN.md) | The design system, revision 2: NeuroScore family (Geist, slate and teal, cards), the logo, components, charts, the guided tours, and the product rules the redesign kept. |
 | 8 | [docs/design/briefs/](docs/design/briefs/) | `/impeccable shape`: one surface brief each for the M1 plain-text email and the M2 web app. |
 | 9 | [docs/reviews/plan-ceo-review.md](docs/reviews/plan-ceo-review.md) | `/plan-ceo-review` (headless, SCOPE EXPANSION) with its outside-voice dispositions (T-01 to T-10). |
 | 10 | [docs/reviews/plan-design-review.md](docs/reviews/plan-design-review.md) | `/plan-design-review` (headless, text-only; 2/10 to 7/10) with its outside-voice dispositions (TD-01 to TD-13). |

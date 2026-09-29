@@ -59,10 +59,21 @@ export default async function EmailPreview({ searchParams }: { searchParams: Pro
   lines.push("Attachment: scorecard-" + period + ".csv (your own rows; case ids only, no patient identifiers)");
 
   return (
-    <Shell viewer={v} period={period} section="scorecard" periodPath="/me/email" crumbs={[{ href: `/me?period=${period}`, label: "Scorecard" }, { label: "Monthly email" }]}>
-      <h1>Your monthly email, as sent</h1>
-      <p className="lede">In the first three months the scorecard arrives as this plain-text email with a CSV of your own rows. The web pages carry the same numbers.</p>
-      <pre className="verbatim" style={{ whiteSpace: "pre-wrap", fontFamily: "var(--font)", fontVariantNumeric: "tabular-nums slashed-zero", maxWidth: "80ch" }}>{lines.join("\n")}</pre>
+    <Shell viewer={v} period={period} section="scorecard" periodPath="/me/email" wide={false} crumbs={[{ href: `/me?period=${period}`, label: "Scorecard" }, { label: "Monthly email" }]}>
+      <div className="flex flex-col gap-5">
+        <div>
+          <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500">Months one to three</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-slate-900">Your monthly email, as sent</h1>
+          <p className="mt-1 max-w-3xl text-[13.5px] text-slate-500">Before the hosted pages, the scorecard arrives as this plain-text email with a CSV of your own rows. The pages carry the same numbers.</p>
+        </div>
+        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" data-tour="email">
+          <div className="flex items-center gap-1.5 border-b border-slate-100 bg-slate-50 px-4 py-2.5">
+            <span className="size-2.5 rounded-full bg-slate-300" /><span className="size-2.5 rounded-full bg-slate-300" /><span className="size-2.5 rounded-full bg-slate-300" />
+            <span className="ml-2 text-[12px] text-slate-500">Mail · plain text</span>
+          </div>
+          <pre className="overflow-x-auto whitespace-pre-wrap px-5 py-5 font-mono text-[12.5px] leading-relaxed text-slate-800">{lines.join("\n")}</pre>
+        </div>
+      </div>
     </Shell>
   );
 }
