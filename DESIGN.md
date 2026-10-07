@@ -37,6 +37,13 @@ spacing: "Tailwind 4px scale; cards p-4 to p-6; grids gap-4 to gap-6; sections g
 
 The first seed of this file ("The OR list and the pen": ruled rows, one ink, no cards) was replaced at the product owner's direction. The owner asked for a more appealing interface in the style of NeuroScore (`kevinfd/neuro-score`), with a better logo, section names instead of "Bucket 1 to 6", and a guided walkthrough of each user journey. The brief wins: this revision adopts NeuroScore's visual family and keeps every product rule that was not visual.
 
+### Pre-demo changes (7 October 2026)
+
+- Disputes hidden behind a flag; no dispute wording on any page, tour or email while it is off.
+- Demo cast of six in the home list and the switcher; the other clinicians are anonymous peers only.
+- Advanced practice providers: a "Provider scorecard" label, only the measures that apply, and a one-line note under Volume and mix saying what is left off and why.
+- Department view: the same cards, tables and sparklines as the scorecard; anonymous dot plots (teal dots, violet dashed median) for spread of practice; reading chips stay neutral, teal or amber, never red or green.
+
 ## What carried over unchanged
 
 These are product rules, not styling, and the redesign keeps all of them:
@@ -72,7 +79,7 @@ These are product rules, not styling, and the redesign keeps all of them:
 
 ## Guided tours
 
-One tour per user journey, launched from the home page or the Tours link: Month posted (12 steps), Dispute a record (10), What patients said (8) and Close the month (7). A step spotlights a `data-tour` element, dims and blocks everything else, and shows a card with the step title, body, an optional call to action and progress dots. Tours switch identity when the journey changes hands (surgeon to chief to another surgeon) through `/tour/go`. Keyboard: arrows move, Escape ends. Definitions live in `src/lib/tours.ts`.
+Tours launched from the home page or the Tours link: Month posted (12 steps), A clinic provider's month (9), What patients said (8), The department at a glance (8) and Close the month (6). Dispute a record (10) returns when `ENABLE_DISPUTES=true`. An odd last card spans both columns. A step spotlights a `data-tour` element, dims and blocks everything else, and shows a card with the step title, body, an optional call to action and progress dots. Tours switch identity when the journey changes hands (surgeon to chief to another surgeon) through `/tour/go`. Keyboard: arrows move, Escape ends. Definitions live in `src/lib/tours.ts`.
 
 ## Motion
 

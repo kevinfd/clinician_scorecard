@@ -1,27 +1,29 @@
 # Clinician Scorecard
 
-A per-surgeon metrics viewer for a neurosurgery department: volume and mix, efficiency, access, quality and outcomes, patient experience, and citizenship. Every number links to its definition and to the records behind it; every record is credited to exactly one clinician and can be disputed; numbers built on too few cases say why instead of showing a blank; peer comparisons are anonymous; every metric shows a trend.
+A per-clinician metrics viewer for a neurosurgery department (surgeons and advanced practice providers): volume and mix, efficiency, access, quality and outcomes, patient experience, and citizenship. Every number links to its definition and to the records behind it; every record is credited to exactly one clinician; numbers built on too few cases say why instead of showing a blank; peer comparisons are anonymous; every metric shows a trend.
 
 This repository holds the product definition (`docs/`) and a working Next.js implementation that deploys to Vercel from this repo. The deployed app runs on a synthetic department only.
 
 ## The app
 
-A Next.js 16 app at the repository root implements the scorecard on a deterministic synthetic department: 14 neurosurgeons at two sites, about two years of OR cases, admissions, clinic visits, survey responses with comments, wRVUs, block days and M&M attendance. Every name, case and comment is invented.
+A Next.js 16 app at the repository root implements the scorecard on a deterministic synthetic department: 14 neurosurgeons and 6 advanced practice providers (NPs and PA-Cs) at two sites, about two years of OR cases, admissions, clinic visits, survey responses with comments, wRVUs, block days and M&M attendance. Every name, case and comment is invented.
 
 What works:
 
 - **All 25 metrics from the brief**, with their cadences (monthly, quarterly, rolling 12 months, fiscal year), minimum n, peer groups, and the brief's wording on every definition page.
 - **Suppression that says why** (min-n, peer group under five, not applicable, source pending, hidden survey month), never a blank.
 - **Anonymous peer spread** as a strip plot of sorted values with "You" marked, and a text table under every chart.
-- **Record lists** behind every number, CSV export, and a dispute button on every disputable row.
-- **Disputes end to end**: filed by the surgeon, routed to the division chief or to the chair when the chief is involved, decided with a note, and applied as an adjudicated value beside the logged one. Re-credited cases move to the other surgeon.
+- **Record lists** behind every number, with CSV export.
+- **Advanced practice providers** get their own scorecard with only the measures that apply to them (clinic volume, notes, access, patient experience, citizenship), compared only with other APPs.
+- **Department view** for the chair and division chief: pooled KPIs with trends, site operations (OR turnover, PACU boarding, room-ready delays), the anonymous spread of practice, outcomes against expected, and patient experience by clinician group. No clinician is named or ranked.
+- **Disputes are hidden for the demo.** The full dispute workflow (filing, routing to the chief or chair, decisions, adjudicated values) is still in the code behind a flag: set `ENABLE_DISPUTES=true` to turn it back on.
 - **Patient feedback inbox** with private notes, visible to the surgeon and their direct leader only, with the leader seeing each month 30 days later.
-- **Views by role**: surgeon, division chief (queue), chair, site lead (direct reports), department analyst (period close: reconciliation, suppression counts, dispute aging).
-- **The M1 plain-text email** preview for each surgeon and month.
-- **Guided tours** of the four user journeys (month posted, dispute a record, what patients said, close the month), launched from the home page. Each tour spotlights one part of the page at a time and switches identity when the journey changes hands.
+- **Views by role**: surgeon, advanced practice provider, division chief (department view and direct reports), department chair (department view), department analyst (period close: reconciliation and suppression counts).
+- **The M1 plain-text email** preview for each clinician and month.
+- **Guided tours** (a surgeon's month, a clinic provider's month, what patients said, the department at a glance, close the month), launched from the home page. Each tour spotlights one part of the page at a time and switches identity when the journey changes hands.
 - The visual system in `DESIGN.md` (revision 2, NeuroScore family): Geist, slate canvas, white cards, teal for you and for action, violet for external references, no verdict colors.
 
-Sign-in is a demo identity picker (home page or the switcher at top right); in the department it is single sign-on. Code lives in `app/` (pages and server actions), `src/lib/` (synthetic data, metric definitions, engine, disputes, storage) and `src/components/`.
+Sign-in is a demo identity picker (home page or the switcher at top right) limited to a six-person cast: two surgeons, the division chief, a nurse practitioner, the department chair and the analyst. The rest of the department exists only as anonymous peers; in the department it is single sign-on. Code lives in `app/` (pages and server actions), `src/lib/` (synthetic data, metric definitions, engine, disputes, storage) and `src/components/`.
 
 ```bash
 npm install
@@ -34,8 +36,9 @@ npm run build
 
 1. In Vercel, choose **Add New > Project** and import `kevinfd/clinician_scorecard`. Vercel detects Next.js; keep the defaults (root directory `.`, build `next build`).
 2. Deploy. Every push to the connected branch redeploys, and pull requests get preview URLs.
-3. Optional: add the **Upstash Redis** integration from the Vercel Marketplace. It sets `KV_REST_API_URL` and `KV_REST_API_TOKEN`, and disputes, decisions and notes become shared across everyone using the deployment. Without it they live in each browser's cookies.
-4. Optional: set `DEMO_PASSCODE` in the project's environment variables to require a passcode before anyone can pick an identity.
+3. Optional: add the **Upstash Redis** integration from the Vercel Marketplace. It sets `KV_REST_API_URL` and `KV_REST_API_TOKEN`, and private notes become shared across everyone using the deployment. Without it they live in each browser's cookies.
+4. Optional: set `ENABLE_DISPUTES=true` to show the dispute workflow (off by default).
+5. Optional: set `DEMO_PASSCODE` in the project's environment variables to require a passcode before anyone can pick an identity.
 
 Do not load real surgeon or patient data into this deployment. The technical design keeps real data on an MGB-managed server behind MGB single sign-on; this app is the product and design reference for that build.
 

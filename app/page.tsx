@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 import {
-  ArrowRight, CalendarCheck, CircleCheck, ClipboardList, Gavel, Inbox, MessageSquareQuote, PlayCircle, Scale, ShieldCheck, Stethoscope, TableProperties,
+  ArrowRight, Building2, CalendarCheck, CircleCheck, ClipboardList, Gavel, HeartPulse, Inbox, MessageSquareQuote, PlayCircle, Scale, ShieldCheck, Stethoscope, TableProperties,
 } from "lucide-react";
 import { enterPasscode, signIn } from "./actions";
 import { Shell } from "@/components/Shell";
@@ -14,6 +14,8 @@ import { cn } from "@/lib/cn";
 
 const ICONS: Record<string, React.ReactNode> = {
   month: <Stethoscope className="size-5" strokeWidth={2} />,
+  app: <HeartPulse className="size-5" strokeWidth={2} />,
+  department: <Building2 className="size-5" strokeWidth={2} />,
   dispute: <Scale className="size-5" strokeWidth={2} />,
   feedback: <MessageSquareQuote className="size-5" strokeWidth={2} />,
   close: <ClipboardList className="size-5" strokeWidth={2} />,
@@ -26,7 +28,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
   const { error } = await searchParams;
   const v = await viewer();
   const d = department();
-  const tours = buildTours();
+  const list = Object.values(buildTours()).filter((t): t is TourDef => !!t);
+  const cast = d.people.filter((p) => p.featured);
   const locked = !!process.env.DEMO_PASSCODE && (await cookies()).get(PASS_COOKIE)?.value !== passToken();
 
   return (
@@ -37,13 +40,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
             <span className="size-1.5 rounded-full bg-teal-500" />Neurosurgery · synthetic demo
           </span>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
-            Every number a surgeon can trust,
+            Every number a clinician can trust,
             <br className="hidden sm:block" /> because every record can be checked
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-[15px] leading-relaxed text-slate-500">
-            Volume, efficiency, access, outcomes, patient experience and citizenship for each surgeon, with the records
-            behind every number, a dispute path to the chief, and anonymous peer comparison. Take a guided tour of a
-            journey, or enter as anyone.
+            Volume, efficiency, access, outcomes, patient experience and citizenship for each surgeon and advanced
+            practice provider, with the records behind every number, anonymous peer comparison, and a pooled view for
+            the chair. Take a guided tour, or enter as one of the people below.
           </p>
         </section>
 
@@ -63,22 +66,26 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
             <section id="tours" aria-labelledby="tours-h" className="scroll-mt-24">
               <h2 id="tours-h" className="sr-only">Guided tours</h2>
               <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-                {Object.values(tours).map((t) => <JourneyCard key={t.id} tour={t} />)}
+                {list.map((t, i) => (
+                  <div key={t.id} className={cn("flex", list.length % 2 === 1 && i === list.length - 1 && "md:col-span-2")}>
+                    <JourneyCard tour={t} />
+                  </div>
+                ))}
               </div>
             </section>
 
             <section aria-labelledby="people-h">
               <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
                 <div>
-                  <h2 id="people-h" className="text-[15px] font-semibold text-slate-900">Or enter as anyone</h2>
+                  <h2 id="people-h" className="text-[15px] font-semibold text-slate-900">Or enter as one of the demo cast</h2>
                   <p className="mt-0.5 text-[13px] text-slate-500">
-                    Each person sees exactly what their role allows. Dr. Imani Okafor is also the division chief; Dr. Rafael Duarte leads Harbor campus.
+                    Each person sees exactly what their role allows. The rest of the department appears only as anonymous peers.
                   </p>
                 </div>
               </div>
               <Card className="divide-y divide-slate-100">
                 <div className="grid grid-cols-1 divide-y divide-slate-100 sm:grid-cols-2 sm:divide-y-0">
-                  {[d.people.filter((p) => p.isSurgeon).slice(0, 8), [...d.people.filter((p) => p.isSurgeon).slice(8), ...d.people.filter((p) => !p.isSurgeon)]].map((col, ci) => (
+                  {[cast.filter((p) => p.isClinician && !p.roles.includes("chief")), cast.filter((p) => !p.isClinician || p.roles.includes("chief"))].map((col, ci) => (
                     <div key={ci} className={cn("divide-y divide-slate-100", ci === 1 && "sm:border-l sm:border-slate-100")}>
                       {col.map((p) => (
                         <form key={p.id} action={signIn} className="flex items-center justify-between gap-3 px-4 py-2.5">
@@ -101,7 +108,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
         )}
 
         <p className="text-center text-[12px] text-slate-400">
-          All data is synthetic: {d.surgeons.length} neurosurgeons at two sites, {d.cases.length.toLocaleString("en-US")} cases,
+          All data is synthetic: {d.surgeons.length} neurosurgeons and {d.apps.length} advanced practice providers at two sites, {d.cases.length.toLocaleString("en-US")} cases,
           data through {monthName(LATEST_PUBLISHED)}. Not for clinical use. Switch identity any time from the top-right.
         </p>
       </div>
@@ -119,7 +126,7 @@ function JourneyCard({ tour }: { tour: TourDef }) {
   const icons = tour.id === "dispute" ? HIGHLIGHT_ICONS_DISPUTE : tour.id === "feedback" ? HIGHLIGHT_ICONS_FEEDBACK : HIGHLIGHT_ICONS;
   const who = department().people.find((p) => p.id === tour.enterAs)!;
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+    <div className="flex w-full flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center gap-3">
         <span className={cn("flex size-10 items-center justify-center rounded-xl", accent.ring)}>{ICONS[tour.id]}</span>
         <div>

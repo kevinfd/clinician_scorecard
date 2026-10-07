@@ -10,7 +10,7 @@ export default async function LeaderInbox({ params }: { params: Promise<{ ref: s
   if (!v) return <Shell viewer={null}><SignInFirst /></Shell>;
   const s = personByRef((await params).ref);
   // Same page for "not yours" and "does not exist".
-  if (!s || !s.isSurgeon || s.directLeaderId !== v.id) return <Shell viewer={v}><NotAuthorized /></Shell>;
+  if (!s || !s.isClinician || s.directLeaderId !== v.id) return <Shell viewer={v}><NotAuthorized /></Shell>;
   const { ov } = await live();
   const items = inboxItems(s, ov, true);
   return (

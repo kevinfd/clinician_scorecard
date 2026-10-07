@@ -1,3 +1,5 @@
+import { DISPUTES_ENABLED } from "@/lib/features";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Shell, SignInFirst, NotAuthorized } from "@/components/Shell";
 import { StatePill, Table } from "@/components/ui";
@@ -7,6 +9,7 @@ import { DISPUTE_HOW, dueDate, FIELD_LABELS, stateLine, stateTone } from "@/lib/
 import { longDate } from "@/lib/periods";
 
 export default async function MyDisputes() {
+  if (!DISPUTES_ENABLED) notFound();
   const v = await viewer();
   if (!v) return <Shell viewer={null}><SignInFirst /></Shell>;
   if (!v.isSurgeon) return <Shell viewer={v}><NotAuthorized /></Shell>;

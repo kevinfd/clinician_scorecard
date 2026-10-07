@@ -1,3 +1,5 @@
+import { DISPUTES_ENABLED } from "@/lib/features";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CircleCheck } from "lucide-react";
 import { Shell, SignInFirst, NotAuthorized } from "@/components/Shell";
@@ -10,6 +12,7 @@ import { findRecord } from "@/lib/records";
 import { person } from "@/lib/synth";
 
 export default async function Queue({ searchParams }: { searchParams: Promise<{ decided?: string }> }) {
+  if (!DISPUTES_ENABLED) notFound();
   const v = await viewer();
   if (!v) return <Shell viewer={null}><SignInFirst /></Shell>;
   if (!isAdjudicator(v)) return <Shell viewer={v}><NotAuthorized /></Shell>;

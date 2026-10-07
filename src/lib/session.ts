@@ -34,17 +34,21 @@ export function isAdjudicator(p: Person | null): boolean {
 /** Surgeons whose inbox this person may read as direct leader of record (GR: surgeon and direct leader only). */
 export function reportsOf(p: Person | null): Person[] {
   if (!p) return [];
-  return department().surgeons.filter((s) => s.directLeaderId === p.id);
+  return department().clinicians.filter((s) => s.directLeaderId === p.id);
 }
 
 export function roleWords(p: Person): string {
+  if (p.kind === "app") {
+    const title = p.credential === "NP" ? "Nurse practitioner" : "Physician assistant";
+    return `${title}, ${p.subspecialty?.toLowerCase()} clinic, ${p.site}`;
+  }
   const parts: string[] = [];
   if (p.isSurgeon) parts.push(`${p.subspecialty} surgeon, ${p.site}`);
-  if (p.roles.includes("chief")) parts.push("division chief");
-  if (p.roles.includes("leader") && !p.roles.includes("chief")) parts.push("site lead");
-  if (p.roles.includes("chair")) parts.push("department chair");
-  if (p.roles.includes("analyst")) parts.push("department analyst");
-  return parts.join("; ");
+  if (p.roles.includes("chief")) parts.push("Division chief");
+  if (p.roles.includes("leader") && !p.roles.includes("chief")) parts.push("Site lead");
+  if (p.roles.includes("chair")) parts.push("Department chair, Neurosurgery");
+  if (p.roles.includes("analyst")) parts.push("Department analyst, Neurosurgery");
+  return parts.join(" · ");
 }
 
 export const ANALYST_MAILBOX = "scorecard-analyst@example.org";

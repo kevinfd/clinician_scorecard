@@ -53,7 +53,8 @@ export function opaqueRef(prefix: string, naturalKey: string): string {
 
 export type Site = "Main campus" | "Harbor campus";
 export type Subspecialty = "Spine" | "Cranial and tumor" | "Vascular" | "Functional" | "Pediatric";
-export type Role = "surgeon" | "chief" | "chair" | "leader" | "analyst";
+export type Role = "surgeon" | "app" | "chief" | "chair" | "leader" | "analyst";
+export type Kind = "surgeon" | "app" | "staff";
 
 export interface Person {
   id: string;
@@ -62,7 +63,11 @@ export interface Person {
   roles: Role[];
   site?: Site;
   subspecialty?: Subspecialty;
+  kind: Kind;
   isSurgeon: boolean;
+  isClinician: boolean; // surgeons and advanced practice providers have a scorecard
+  credential?: "NP" | "PA-C";
+  featured: boolean; // shown in the demo identity list
   hasBlock: boolean;
   directLeaderId?: string;
   optedOutOn?: string; // peer-spread opt-out date (F-35)
@@ -80,6 +85,8 @@ export interface Person {
     survey: number; // survey tendency 0..1
     mmAttend: number;
     wrvu: number; // monthly wRVU base
+    visits: number; // clinic visits per month
+    newShare: number; // share of visits that are new patients
   };
 }
 
@@ -113,7 +120,7 @@ const SEEDS: Seed[] = [
 
 const DEFAULT_PROFILE: Person["profile"] = {
   volume: 15, onTime: 0.75, ownDelayShare: 0.35, booking: 0.68, notes72: 0.82, access: 24,
-  los: 0.97, comp: 1, survey: 0.65, mmAttend: 0.8, wrvu: 620,
+  los: 0.97, comp: 1, survey: 0.65, mmAttend: 0.8, wrvu: 620, visits: 28, newShare: 0.4,
 };
 
 function buildRoster(): Person[] {
@@ -132,7 +139,10 @@ function buildRoster(): Person[] {
       roles: ["surgeon"],
       site: s.site,
       subspecialty: s.sub,
+      kind: "surgeon",
       isSurgeon: true,
+      isClinician: true,
+      featured: false,
       hasBlock: s.block,
       stepZeroAttended: true,
       facultyStart: "2015-07-01",
@@ -155,15 +165,37 @@ function buildRoster(): Person[] {
   // A surgeon who joined mid-year (faculty dates; M&M denominator).
   people[13].facultyStart = "2025-12-01";
 
-  const chair: Person = {
-    id: "P01", ref: opaqueRef("K", "P01"), name: "Dr. Margaret Ellison", roles: ["chair"],
-    isSurgeon: false, hasBlock: false, stepZeroAttended: true, facultyStart: "2010-01-01", profile: DEFAULT_PROFILE,
-  };
-  const analyst: Person = {
-    id: "P02", ref: opaqueRef("K", "P02"), name: "Jordan Pike", roles: ["analyst"],
-    isSurgeon: false, hasBlock: false, stepZeroAttended: true, facultyStart: "2020-01-01", profile: DEFAULT_PROFILE,
-  };
-  return [...people, chair, analyst];
+  // Advanced practice providers: nurse practitioners and physician assistants who run
+  // neurosurgery clinics. They have a clinic scorecard and are compared only with each other.
+  const appSeeds: { name: string; credential: "NP" | "PA-C"; site: Site; sub: Subspecialty; profile: Partial<Person["profile"]> }[] = [
+    { name: "Alicia Moreno", credential: "NP", site: "Main campus", sub: "Spine", profile: { notes72: 0.9, access: 12, survey: 0.82 } },
+    { name: "Grace Whitfield", credential: "PA-C", site: "Main campus", sub: "Cranial and tumor", profile: { notes72: 0.78, access: 16 } },
+    { name: "Owen Castellanos", credential: "NP", site: "Main campus", sub: "Spine", profile: { notes72: 0.85, access: 10 } },
+    { name: "Priya Natarajan", credential: "PA-C", site: "Main campus", sub: "Functional", profile: { notes72: 0.7, access: 19 } },
+    { name: "Ben Albright", credential: "NP", site: "Harbor campus", sub: "Spine", profile: { notes72: 0.88, access: 14 } },
+    { name: "Leah Okonjo", credential: "PA-C", site: "Harbor campus", sub: "Pediatric", profile: { notes72: 0.8, access: 21 } },
+  ];
+  const apps: Person[] = appSeeds.map((a, i) => {
+    const id = `A${String(i + 1).padStart(2, "0")}`;
+    const profile = { ...DEFAULT_PROFILE, volume: 0, visits: 52, newShare: 0.5, wrvu: Math.round(255 + r.normal(0, 25)), ...a.profile };
+    return {
+      id, ref: opaqueRef("K", id), name: `${a.name}, ${a.credential}`, roles: ["app"], kind: "app", isSurgeon: false, isClinician: true,
+      credential: a.credential, featured: false, site: a.site, subspecialty: a.sub, hasBlock: false, stepZeroAttended: true,
+      facultyStart: "2019-07-01", directLeaderId: chief.id, profile,
+    } satisfies Person;
+  });
+
+  const staff = (id: string, name: string, roles: Role[], since: string): Person => ({
+    id, ref: opaqueRef("K", id), name, roles, kind: "staff", isSurgeon: false, isClinician: false, featured: true,
+    hasBlock: false, stepZeroAttended: true, facultyStart: since, profile: DEFAULT_PROFILE,
+  });
+  const chair = staff("P01", "Dr. Margaret Ellison", ["chair"], "2010-01-01");
+  const analyst = staff("P02", "Jordan Pike", ["analyst"], "2020-01-01");
+
+  // The demo cast: everyone else exists only as an anonymous peer.
+  for (const id of ["S01", "S02", "S05"]) people.find((x) => x.id === id)!.featured = true;
+  apps[0].featured = true;
+  return [...people, ...apps, chair, analyst];
 }
 
 // ---------- record types ----------
@@ -349,6 +381,8 @@ const COMMENTS_MIXED = [
 export interface Department {
   people: Person[];
   surgeons: Person[];
+  apps: Person[];
+  clinicians: Person[];
   cases: Case[];
   admissions: Admission[];
   visits: Visit[];
@@ -380,7 +414,9 @@ function workdays(p: Period): string[] {
 
 function build(): Department {
   const people = buildRoster();
-  const surgeons = people.filter((p) => p.isSurgeon);
+  const surgeons = people.filter((p) => p.kind === "surgeon");
+  const apps = people.filter((p) => p.kind === "app");
+  const clinicians = [...surgeons, ...apps];
   const months = range(DATA_START, LATEST_PUBLISHED);
   const cases: Case[] = [];
   const admissions: Admission[] = [];
@@ -390,12 +426,13 @@ function build(): Department {
   const blocks: BlockDay[] = [];
   const wrvu: WrvuMonth[] = [];
 
-  for (const s of surgeons) {
+  for (const s of clinicians) {
     const pr = s.profile;
     for (const p of months) {
       if (p < s.facultyStart.slice(0, 7)) continue;
       const r = rng(`${s.id}:${p}`);
       const days = workdays(p);
+      if (s.kind === "surgeon") {
       const n = Math.max(3, Math.round(r.normal(pr.volume, pr.volume * 0.15)));
       const orDays = new Set<string>();
       const procs = PROCEDURES.filter((x) => x.sub.includes(s.subspecialty!));
@@ -472,8 +509,9 @@ function build(): Department {
           });
         }
       }
+      }
       // Clinic visits
-      const nv = Math.max(4, Math.round(r.normal(28, 5)));
+      const nv = Math.max(4, Math.round(r.normal(pr.visits, 5)));
       for (let i = 0; i < nv; i++) {
         const date = r.pick(days);
         const late = !r.chance(pr.notes72);
@@ -482,7 +520,7 @@ function build(): Department {
           clinicianId: s.id,
           date,
           period: p,
-          newPatient: r.chance(0.4),
+          newPatient: r.chance(pr.newShare),
           noteSignedHours: late ? r.int(73, 240) : r.int(1, 70),
         });
       }
@@ -587,7 +625,7 @@ function build(): Department {
   }
 
   return {
-    people, surgeons, cases, admissions, visits, samples, surveys, sessions, attendance, wrvu, blocks,
+    people, surgeons, apps, clinicians, cases, admissions, visits, samples, surveys, sessions, attendance, wrvu, blocks,
     refreshedOn: "2026-09-10",
   };
 }

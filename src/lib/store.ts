@@ -4,6 +4,7 @@
 
 import { cookies } from "next/headers";
 import { applyEvents, overridesFrom, seededDisputes, type Dispute, type DisputeEvent, type OverrideMap } from "./disputes";
+import { DISPUTES_ENABLED } from "./features";
 
 export interface Note {
   id: string;
@@ -122,6 +123,8 @@ export interface Live {
 /** Seeded plus filed disputes, with decisions applied, and the overrides they produce. */
 export async function live(): Promise<Live> {
   const state = await loadState();
+  // With disputes switched off, no dispute exists and no adjudicated value applies: every number is as logged.
+  if (!DISPUTES_ENABLED) return { state, disputes: [], ov: new Map() };
   const seeded = seededDisputes();
   const seededIds = new Set(seeded.map((d) => d.id));
   const all = [...seeded, ...state.disputes.filter((d) => !seededIds.has(d.id))];

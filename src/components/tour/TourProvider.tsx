@@ -18,7 +18,7 @@ function stepUrl(route: string, tour: string, step: number) {
 const pathOf = (route: string) => route.split("?")[0];
 const currentViewer = () => document.getElementById("cs-viewer")?.dataset.id ?? "";
 
-export function TourProvider({ tours }: { tours: Record<TourId, TourDef> }) {
+export function TourProvider({ tours }: { tours: Partial<Record<TourId, TourDef>> }) {
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();

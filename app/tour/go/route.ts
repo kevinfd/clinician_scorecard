@@ -10,7 +10,7 @@ export async function GET(req: Request) {
   const step = Number(url.searchParams.get("step") ?? "0");
   const base = `${url.protocol}//${url.host}`;
   if (!isTourId(tour)) return NextResponse.redirect(new URL("/", base));
-  const def = buildTours()[tour];
+  const def = buildTours()[tour]!;
   const s = def.steps[Math.max(0, Math.min(def.steps.length - 1, Number.isFinite(step) ? step : 0))];
   const jar = await cookies();
   if (process.env.DEMO_PASSCODE && jar.get(PASS_COOKIE)?.value !== passToken()) return NextResponse.redirect(new URL("/", base));

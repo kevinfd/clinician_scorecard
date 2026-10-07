@@ -52,6 +52,12 @@ export interface PeerGroup {
 }
 
 export function peerGroup(viewer: Person, rule: PeerRule): PeerGroup {
+  // Like is compared with like: advanced practice providers form their own peer group.
+  if (viewer.kind === "app") {
+    const all = department().apps;
+    const words = "advanced practice providers in neurosurgery";
+    return { members: all.filter((s) => s.id !== viewer.id && !s.optedOutOn), size: all.length, words, scopeWords: words };
+  }
   const all = department().surgeons.filter((s) => {
     switch (rule) {
       case "subspecialty_site": return s.site === viewer.site && s.subspecialty === viewer.subspecialty;
@@ -156,7 +162,8 @@ export function comparatorLine(def: MetricDef, viewer: Person): string | undefin
   if (def.peer === "none") return undefined;
   const g = peerGroup(viewer, def.peer);
   const others = g.size - 1;
-  const count = others === 0 ? "no other surgeons" : `${g.size} surgeons`;
+  const noun = viewer.kind === "app" ? "providers" : "surgeons";
+  const count = others === 0 ? `no other ${noun}` : `${g.size} ${noun}`;
   const extra = def.comparedTo.includes("Vizient") ? ", and Vizient" : "";
   return `Compared to: ${g.words} (${count})${extra}`;
 }
@@ -329,15 +336,16 @@ export function surveyView(def: MetricDef, viewer: Person, p: Period, ov: Overri
     };
   });
   let bars: SurveyView["bars"];
-  const peers = d.surgeons.filter((s) => !s.optedOutOn && s.id !== viewer.id);
+  const peers = (viewer.kind === "app" ? d.apps : d.surgeons).filter((s) => !s.optedOutOn && s.id !== viewer.id);
+  const groupWords = viewer.kind === "app" ? "advanced practice providers" : "neurosurgeons";
   if (viewer.optedOutOn) bars = { reason: `Peer comparison not shown: you opted out of the peer spread (recorded ${longDate(viewer.optedOutOn)}).` };
   else if (!viewer.stepZeroAttended) bars = { reason: "Peer comparison not shown: it starts after you have seen the definitions and ground rules presented at faculty meeting." };
   else if (ya.value !== null) {
     const vals = peers.map((s) => surveyValue(def.key, mine(s.id, year)).value).filter((v): v is number => v !== null);
-    if (vals.length < MIN_PEERS) bars = { reason: `Peer comparison not shown: only ${vals.length} other neurosurgeons across the system had responses; 5 are needed for a comparison.` };
+    if (vals.length < MIN_PEERS) bars = { reason: `Peer comparison not shown: only ${vals.length} other ${groupWords} had responses; 5 are needed for a comparison.` };
     else {
       const all = [...vals].sort((a, b) => a - b);
-      bars = { values: all, you: ya.value, sentence: `Your year average ${ya.value} among ${all.length} neurosurgeons ranging from ${all[0]} to ${all[all.length - 1]}.` };
+      bars = { values: all, you: ya.value, sentence: `Your year average ${ya.value} among ${all.length} ${groupWords} ranging from ${all[0]} to ${all[all.length - 1]}.` };
     }
   }
   return { yearAverage: { ...ya, n: mine(viewer.id, year).length }, months, mgb: MGB_AVERAGE[def.key], bars };

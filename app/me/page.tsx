@@ -5,7 +5,7 @@ import { MetricCard } from "@/components/MetricCard";
 import { Avatar, Callout, Card, SectionHeader, StatePill } from "@/components/ui";
 import { viewer } from "@/lib/session";
 import { live } from "@/lib/store";
-import { BUCKETS, METRICS, SECTION_SLUG, type MetricDef } from "@/lib/metrics";
+import { appliesTo, BUCKETS, METRICS, SECTION_SLUG, type MetricDef } from "@/lib/metrics";
 import { fmtValue, mmView, surveyView, tileFor, trendFor, wrvuView, type Tile } from "@/lib/engine";
 import { addMonths, FIRST_PUBLISHED, longDate, monthName, monthOnly, normalizePeriod, publishDate } from "@/lib/periods";
 import { department } from "@/lib/synth";
@@ -16,13 +16,14 @@ import type { Person } from "@/lib/synth";
 export default async function Home({ searchParams }: { searchParams: Promise<{ period?: string }> }) {
   const v = await viewer();
   if (!v) return <Shell viewer={null}><SignInFirst /></Shell>;
-  if (!v.isSurgeon) return <Shell viewer={v}><NotAuthorized /></Shell>;
+  if (!v.isClinician) return <Shell viewer={v}><NotAuthorized /></Shell>;
   const period = normalizePeriod((await searchParams).period);
   const { disputes, ov } = await live();
 
-  const tiles = new Map<string, Tile>(METRICS.map((m) => [m.key, tileFor(m, v, period, ov)]));
+  const mine_metrics = METRICS.filter((m) => appliesTo(m, v));
+  const tiles = new Map<string, Tile>(mine_metrics.map((m) => [m.key, tileFor(m, v, period, ov)]));
   const prev = addMonths(period, -1);
-  const prevTiles = period === FIRST_PUBLISHED ? null : new Map(["or_case_volume", "fcot", "duration_accuracy"].map((k) => [k, tileFor(METRICS.find((m) => m.key === k)!, v, prev, ov)]));
+  const prevTiles = period === FIRST_PUBLISHED ? null : new Map((v.kind === "app" ? ["new_patient_visits", "notes_72h", "third_next"] : ["or_case_volume", "fcot", "duration_accuracy"]).map((k) => [k, tileFor(METRICS.find((m) => m.key === k)!, v, prev, ov)]));
   const since = publishDate(prev);
   const mine = disputes.filter((d) => d.filedById === v.id || d.proposedClinicianId === v.id);
   const decided = mine.filter((d) => d.decidedOn && d.decidedOn >= since && d.state !== "withdrawn");
@@ -36,7 +37,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
             <div className="flex items-start gap-4">
               <Avatar name={v.name} className="size-14" />
               <div>
-                <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500">Surgeon scorecard</p>
+                <p className="text-[11px] font-medium uppercase tracking-wider text-slate-500">{v.kind === "app" ? "Provider scorecard" : "Surgeon scorecard"}</p>
                 <h1 className="mt-0.5 text-2xl font-semibold tracking-tight text-slate-900">{v.name}</h1>
                 <p className="mt-1 text-[14px] text-slate-600">{v.subspecialty} · {v.site}</p>
                 <p className="mt-1 text-[12.5px] text-slate-400">{monthName(period)} · published {longDate(publishDate(period))} · last refreshed {longDate(department().refreshedOn)}</p>
@@ -54,7 +55,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
         <div data-tour="what-changed">
           {period === FIRST_PUBLISHED ? (
             <Callout tone="teal" title="Your first monthly scorecard">
-              Numbers from the OR log and the other department feeds for {monthName(period)}, with your own records behind each one. Only you see this page; your chief or chair sees one of your rows only when you dispute it. Peer comparison starts next month.
+              Numbers from the OR log and the other department feeds for {monthName(period)}, with your own records behind each one. Only you see this page. Peer comparison starts next month.
             </Callout>
           ) : (
             <Callout tone="teal" title={`What changed since ${monthName(prev)}`}>
@@ -84,15 +85,20 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ p
           )}
         </div>
 
-        {[1, 2, 3, 4, 5, 6].map((b) => (
+        {[1, 2, 3, 4, 5, 6].filter((b) => mine_metrics.some((m) => m.bucket === b)).map((b) => (
           <section key={b} aria-labelledby={`sec-${b}`} data-tour={`section-${SECTION_SLUG[b]}`}>
             <SectionHeader id={`sec-${b}`} title={BUCKETS[b].name} sub={BUCKETS[b].intro} />
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {METRICS.filter((m) => m.bucket === b).map((m) => <Tile key={m.key} def={m} tile={tiles.get(m.key)!} v={v} period={period} ov={ov} />)}
+              {mine_metrics.filter((m) => m.bucket === b).map((m) => <Tile key={m.key} def={m} tile={tiles.get(m.key)!} v={v} period={period} ov={ov} />)}
             </div>
-            {b === 2 && (
+            {b === 2 && v.kind === "surgeon" && (
               <p className="mt-3 text-[12.5px] text-slate-500">
                 Not on your scorecard: OR turnover time, PACU boarding and room-ready delays. A surgeon cannot move these alone, so they appear only on division and site views.
+              </p>
+            )}
+            {b === 1 && v.kind === "app" && (
+              <p className="mt-3 text-[12.5px] text-slate-500">
+                Operating-room, surgical outcome and M&amp;M measures apply to operating surgeons, so they are not on an advanced practice provider&apos;s scorecard. You are compared only with other advanced practice providers.
               </p>
             )}
           </section>
@@ -146,7 +152,7 @@ function Tile({ def, tile, v, period, ov }: { def: MetricDef; tile: Tile; v: Per
     return (
       <MetricCard href={href} name={def.name} value={s.yearAverage.value === null ? "—" : `${s.yearAverage.value}${unit}`} spark={trend}
         sub={<>Year average · {s.yearAverage.n} responses{s.months.some((m) => m.hidden) ? ` · ${s.months.filter((m) => m.hidden).length} recent month hidden (under 10)` : ""}</>}
-        reference={`MGB average ${s.mgb}${unit}`} footer={["vs neurosurgeons across the system"]} />
+        reference={`MGB average ${s.mgb}${unit}`} footer={[v.kind === "app" ? "vs advanced practice providers in neurosurgery" : "vs neurosurgeons across the system"]} />
     );
   }
   const spark = trendFor(def, v, period, ov).map((p) => p.value);

@@ -6,18 +6,19 @@ import { StripPlot, TrendChart, GhostBars, BarSpread, Responsive } from "@/compo
 import { Card, CardBody, CardHeader, Chip, LinkButton, StatePill, Table } from "@/components/ui";
 import { viewer } from "@/lib/session";
 import { live } from "@/lib/store";
-import { metric, BUCKETS } from "@/lib/metrics";
+import { appliesTo, metric, BUCKETS } from "@/lib/metrics";
 import { disputesOnRecord, fmtValue, mmView, surveyView, tileFor, trendFor, wrvuView } from "@/lib/engine";
 import { longDate, monthName, normalizePeriod } from "@/lib/periods";
 import { department } from "@/lib/synth";
 import { stateLine, stateTone } from "@/lib/disputes";
+import { DISPUTES_ENABLED } from "@/lib/features";
 
 export default async function MetricPage({ params, searchParams }: { params: Promise<{ key: string }>; searchParams: Promise<{ period?: string }> }) {
   const v = await viewer();
   if (!v) return <Shell viewer={null}><SignInFirst /></Shell>;
   const { key } = await params;
   const def = metric(key);
-  if (!v.isSurgeon || !def) return <Shell viewer={v}><NotAuthorized /></Shell>;
+  if (!v.isClinician || !def || !appliesTo(def, v)) return <Shell viewer={v}><NotAuthorized /></Shell>;
   if (def.key === "feedback_inbox") redirect("/me/inbox");
   const period = normalizePeriod((await searchParams).period);
   const { disputes, ov } = await live();
@@ -127,7 +128,7 @@ export default async function MetricPage({ params, searchParams }: { params: Pro
     if (!pts.length) return null;
     return (
       <Card data-tour="metric-trend">
-        <CardHeader title="Trend" sub={`${pts.length} ${def!.cadence === "month" ? "months" : "periods"}. A diamond marks a value restated after a sustained dispute.`} />
+        <CardHeader title="Trend" sub={`${pts.length} ${def!.cadence === "month" ? "months" : "periods"}${DISPUTES_ENABLED ? ". A diamond marks a value restated after a sustained dispute." : "."}`} />
         <CardBody className="flex flex-col gap-4">
           <Responsive render={(W) => <TrendChart W={W} points={pts} fmt={fmt} title={`${def!.name}: ${pts.filter((p) => p.value !== null).map((p) => `${fmt(p.value!)} in ${p.label}`).join(", ")}`} />} />
           <details className="group rounded-lg border border-slate-200">
@@ -179,7 +180,7 @@ export default async function MetricPage({ params, searchParams }: { params: Pro
           </div>
           <p className={mm.unreachable ? "rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[14px] font-medium text-amber-900" : "text-[14px] text-slate-700"}>{mm.pace}</p>
           <p className="text-[13px] text-slate-500">{mm.remaining} {mm.remaining === 1 ? "session" : "sessions"} remaining in fiscal year {mm.fy}. No peer comparison.</p>
-          <Table head={[{ label: "Date" }, { label: "Topic" }, { label: "Recorded" }, { label: "Dispute" }]}>
+          <Table head={[{ label: "Date" }, { label: "Topic" }, { label: "Recorded" }, ...(DISPUTES_ENABLED ? [{ label: "Dispute" }] : [])]}>
             {mm.sessions.map((s) => {
               const ds = disputesOnRecord(disputes, s.ref, v!.id);
               return (
@@ -187,10 +188,10 @@ export default async function MetricPage({ params, searchParams }: { params: Pro
                   <th scope="row" className="whitespace-nowrap px-4 py-2 text-left font-medium text-slate-800">{longDate(s.date)}</th>
                   <td className="px-4 py-2 text-slate-600">{s.topic}</td>
                   <td className="px-4 py-2 text-slate-700">{s.status}</td>
-                  <td className="px-4 py-2">
+                  {DISPUTES_ENABLED ? <td className="px-4 py-2">
                     {ds[0] ? <StatePill tone={stateTone(ds[0])}>{stateLine(ds[0])}</StatePill>
                       : s.status === "not recorded as attended" ? <LinkButton size="sm" href={`/records/${encodeURIComponent(s.ref)}/dispute?metric=mm_attendance&period=${period}`} aria-label={`Dispute this record, session ${s.date}`}>Dispute</LinkButton> : null}
-                  </td>
+                  </td> : null}
                 </tr>
               );
             })}

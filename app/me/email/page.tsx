@@ -11,11 +11,11 @@ const WEDGE = ["or_case_volume", "fcot", "duration_accuracy", "same_day_cancel"]
 export default async function EmailPreview({ searchParams }: { searchParams: Promise<{ period?: string }> }) {
   const v = await viewer();
   if (!v) return <Shell viewer={null}><SignInFirst /></Shell>;
-  if (!v.isSurgeon) return <Shell viewer={v}><NotAuthorized /></Shell>;
+  if (!v.isClinician) return <Shell viewer={v}><NotAuthorized /></Shell>;
   const period = normalizePeriod((await searchParams).period);
   const { ov } = await live();
   const lines: string[] = [];
-  lines.push(`Subject: Your ${monthName(period)} OR numbers and case list`);
+  lines.push(v.kind === "app" ? `Subject: Your ${monthName(period)} clinic numbers and visit list` : `Subject: Your ${monthName(period)} OR numbers and case list`);
   lines.push(`From: Department scorecard <${ANALYST_MAILBOX}>`);
   lines.push("");
   lines.push(`Clinician Scorecard · ${v.name}`);
@@ -23,11 +23,11 @@ export default async function EmailPreview({ searchParams }: { searchParams: Pro
   lines.push(`Last refreshed ${longDate(publishDate(period))}`);
   lines.push("");
   if (period === FIRST_PUBLISHED) {
-    lines.push(`First monthly email. Four numbers from periop's OR log for ${monthName(period)}, and your own case list.`);
-    lines.push("Only you receive this email; your chief or chair sees one of your rows only when you dispute it.");
+    lines.push(v.kind === "app" ? `First monthly email. Your clinic numbers for ${monthName(period)}, and your own visit list.` : `First monthly email. Four numbers from periop's OR log for ${monthName(period)}, and your own case list.`);
+    lines.push("Only you receive this email.");
     lines.push("");
   }
-  for (const key of WEDGE) {
+  for (const key of v.kind === "app" ? ["new_patient_visits", "notes_72h", "third_next"] : WEDGE) {
     const def = METRICS.find((m) => m.key === key)!;
     const t = tileFor(def, v, period, ov);
     lines.push(def.name.toUpperCase());
@@ -48,10 +48,9 @@ export default async function EmailPreview({ searchParams }: { searchParams: Pro
     if (tr.length > 1) lines.push(`Trend: ${tr.map((p) => `${p.label} ${p.value === null ? "not shown" : fmtValue(def, p.value)}`).join(" | ")}`);
     lines.push("");
   }
-  lines.push("TO DISPUTE A ROW");
+  lines.push("QUESTIONS ABOUT A ROW");
   lines.push("");
-  lines.push("Reply to this email with the case id (the first column of the attachment) and what is wrong.");
-  lines.push("Your division chief decides, or the chair if the chief is involved. The target is 14 days.");
+  lines.push("Reply to this email with the case id (the first column of the attachment) and your question.");
   lines.push("");
   lines.push("WHAT THIS IS NOT");
   lines.push("");

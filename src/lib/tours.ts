@@ -6,8 +6,9 @@
 import { department } from "./synth";
 import { seededDisputes } from "./disputes";
 import { LATEST_PUBLISHED } from "./periods";
+import { DISPUTES_ENABLED } from "./features";
 
-export type TourId = "month" | "dispute" | "feedback" | "close";
+export type TourId = "month" | "app" | "dispute" | "feedback" | "department" | "close";
 
 export interface TourStep {
   target: string | null;
@@ -30,11 +31,13 @@ export interface TourDef {
   steps: TourStep[];
 }
 
+export type Tours = Partial<Record<TourId, TourDef>>;
+
 export function isTourId(s: string | null | undefined): s is TourId {
-  return s === "month" || s === "dispute" || s === "feedback" || s === "close";
+  return !!s && s in buildTours();
 }
 
-export function buildTours(): Record<TourId, TourDef> {
+export function buildTours(): Tours {
   const d = department();
   const seeded = seededDisputes();
   const d11 = seeded.find((x) => x.id === "D-0011");
@@ -55,16 +58,16 @@ export function buildTours(): Record<TourId, TourDef> {
     steps: [
       { target: null, route: "/me", as: "S02", title: "The month is posted", body: "You are Dr. Tomas Lindqvist, a spine surgeon at Main campus. The August numbers were published on 10 September. This tour follows what he does in the ten minutes after the email arrives." },
       { target: "me-header", route: "/me", as: "S02", title: "Whose numbers, for when", body: "Every page opens with the same stamp: the surgeon, the site, the period and when the data was last refreshed. Pick any published month from the period control." },
-      { target: "what-changed", route: "/me", as: "S02", title: "What changed since last month", body: "The first thing to read: the headline numbers against July, and where each of your disputes stands. An open dispute on an August case is already here." },
+      { target: "what-changed", route: "/me", as: "S02", title: "What changed since last month", body: DISPUTES_ENABLED ? "The first thing to read: the headline numbers against July, and where each of your disputes stands. An open dispute on an August case is already here." : "The first thing to read: the headline numbers against July, each with its count, so a change of one case is not mistaken for a trend." },
       { target: "section-volume", route: "/me", as: "S02", title: "Volume and mix", body: "Each card is one metric from the department's definitions: the value with its count, a trend line, how many records sit behind it, and who it is compared with. There is no composite score and no rank." },
       { target: "section-access", route: "/me", as: "S02", title: "A reason, never a blank", body: "When a number cannot be shown, the card says why. Referral-to-visit days has no confirmed data source yet, so it says exactly that instead of showing an empty box or a zero." },
-      { target: "metric-value", route: "/me/metric/fcot", as: "S02", title: "One metric, opened up", body: "First-case on-time start with its count, and a line that splits the late cases into your delays and delays that were not yours. Both still count under the definition; the split tells you what to dispute.", cta: "Open any card to reach this page" },
+      { target: "metric-value", route: "/me/metric/fcot", as: "S02", title: "One metric, opened up", body: "First-case on-time start with its count, and a line that splits the late cases into your delays and delays that were not yours. Both still count under the definition; the split shows how much of the number was in your hands.", cta: "Open any card to reach this page" },
       { target: "metric-spread", route: "/me/metric/fcot", as: "S02", title: "Where you sit, anonymously", body: "Your value against the sorted values of the other neurosurgeons at your site. No one is named. A comparison appears only when at least five others each have enough cases." },
-      { target: "metric-trend", route: "/me/metric/fcot", as: "S02", title: "A trend, not a snapshot", body: "Every metric carries its history, with a table under the chart. A point restated after a sustained dispute is marked." },
+      { target: "metric-trend", route: "/me/metric/fcot", as: "S02", title: "A trend, not a snapshot", body: "Every metric carries its history, with a table under the chart. A month with too few cases is shown as a gap with its reason, never as zero." },
       { target: "metric-definition", route: "/me/metric/fcot", as: "S02", title: "The definition and its source", body: "The definition version, the assumption still to be confirmed (no grace window), and the feed the number came from. The definition link opens the department's wording verbatim." },
-      { target: "records-table", route: `/me/metric/fcot/records?period=${P}`, as: "S02", title: "The records behind the number", body: "Every first case credited to him in August: scheduled start, wheels in, the delay reason as logged. This is the list a surgeon checks before trusting the number.", cta: "Dispute this record, on any row" },
+      { target: "records-table", route: `/me/metric/fcot/records?period=${P}`, as: "S02", title: "The records behind the number", body: "Every first case credited to him in August: scheduled start, wheels in, the delay reason as logged. This is the list a surgeon checks before trusting the number.", cta: "Download the rows as a spreadsheet" },
       { target: "email", route: `/me/email?period=${P}`, as: "S02", title: "The email that started it", body: "In the first three months the scorecard arrives as this plain-text email with a spreadsheet of the surgeon's own rows. The pages show the same numbers." },
-      { target: null, route: "/me", as: "S02", title: "That's the month", body: "Stamp, what changed, six areas, one metric opened, its records. Take the dispute tour next to see what happens when a row is wrong." },
+      { target: null, route: "/me", as: "S02", title: "That's the month", body: "Stamp, what changed, six areas, one metric opened, its records. Every number on the page can be traced to the records behind it." },
     ],
   };
 
@@ -113,7 +116,7 @@ export function buildTours(): Record<TourId, TourDef> {
       { target: "survey-table", route: "/me/metric/explained", as: "S05", title: "The layout you already know", body: "Year average, each of the past three months, and the MGB average, exactly as shown at faculty meeting. A month with fewer than 10 responses is hidden for that month only, with the count shown." },
       { target: "survey-bars", route: "/me/metric/explained", as: "S05", title: "Everyone in your peer group", body: "The one new thing: an anonymous bar for every neurosurgeon in the system, with your own bar marked. No other bar is labelled." },
       { target: "inbox-intro", route: "/me/inbox", as: "S05", title: "The feedback inbox", body: "Every de-identified comment, newest first, with the scores from the same survey. Comments are never counted, compared or rolled up. The line at the top says exactly who else can read it." },
-      { target: "inbox-item", route: "/me/inbox", as: "S05", title: "Read, reflect, add a note", body: "Each comment sits with its scores. A private note stays with the surgeon; it is never shown to the leader. If the patient was not hers, the attribution can be disputed, never the comment.", cta: "Add a private note" },
+      { target: "inbox-item", route: "/me/inbox", as: "S05", title: "Read, reflect, add a note", body: "Each comment sits with its scores. A private note stays with the surgeon; it is never shown to the leader.", cta: "Add a private note" },
       { target: "leader-table", route: "/leader", as: "S01", title: "The direct leader's view", body: "You are now Dr. Okafor, who is Dr. Mizrahi's direct leader of record. She can read her reports' inboxes and nothing else of theirs: no scorecard numbers." },
       { target: "leader-inbox", route: `/leader/${mizrahi.ref}/inbox`, as: "S01", title: "Thirty days later, without notes", body: "The leader sees each survey month 30 days after the surgeon does, so the surgeon reads it first. Private notes are never shown." },
       { target: null, route: "/me/inbox", as: "S05", title: "That's patient experience", body: "Scores in a familiar layout, anonymous peers, comments in one place, and a clear line on who sees what." },
@@ -125,22 +128,74 @@ export function buildTours(): Record<TourId, TourDef> {
     journey: "J4",
     label: "Close the month",
     persona: "Jordan Pike, department analyst",
-    blurb: "The analyst's monthly close: reconcile to periop's report, check that every cell has a value or a reason, watch dispute aging, and keep definitions versioned.",
-    highlights: ["Reconciliation gate", "No blank cells, ever", "Dispute aging against 14 days", "Versioned definitions and assumptions"],
+    blurb: DISPUTES_ENABLED ? "The analyst's monthly close: reconcile to periop's report, check that every cell has a value or a reason, watch dispute aging, and keep definitions versioned." : "The analyst's monthly close: reconcile to periop's report, check that every cell has a value or a reason, and keep definitions versioned.",
+    highlights: ["Reconciliation gate", "No blank cells, ever", DISPUTES_ENABLED ? "Dispute aging against 14 days" : "Surgeons and APPs in one close", "Versioned definitions and assumptions"],
     accent: "slate",
     enterAs: "P02",
     steps: [
-      { target: null, route: "/analyst", as: "P02", title: "Closing the month", body: "You are Jordan Pike, the department analyst who runs the monthly close. Nothing reaches a surgeon until these checks pass." },
-      { target: "recon", route: "/analyst", as: "P02", title: "Match periop's report first", body: "Every wedge number must equal periop's own report or carry a written explanation. Differences caused by sustained disputes are counted and explained, not hidden." },
-      { target: "suppression", route: "/analyst", as: "P02", title: "Every cell: a value or a reason", body: "Counts only, never a surgeon's value: how many cells show a number, how many fall below minimum n, how many are not applicable or waiting on a data source, and how often the peer spread could be shown." },
-      { target: "open-disputes", route: "/analyst", as: "P02", title: "Dispute aging", body: "Open disputes with who holds them and how old they are against the 14-day target." },
+      { target: null, route: "/analyst", as: "P02", title: "Closing the month", body: "You are Jordan Pike, the department analyst who runs the monthly close. Nothing reaches a clinician until these checks pass." },
+      { target: "recon", route: "/analyst", as: "P02", title: "Match periop's report first", body: "Every wedge number must equal periop's own report or carry a written explanation. Any difference is written down, never hidden." },
+      { target: "suppression", route: "/analyst", as: "P02", title: "Every cell: a value or a reason", body: "Counts only, never a clinician's value: how many cells show a number, how many fall below minimum n, how many are not applicable or waiting on a data source, and how often the peer spread could be shown." },
+      ...(DISPUTES_ENABLED ? [{ target: "open-disputes", route: "/analyst", as: "P02", title: "Dispute aging", body: "Open disputes with who holds them and how old they are against the 14-day target." }] : []),
       { target: "definition-params", route: "/definitions/fcot", as: "P02", title: "Definitions are versioned", body: "Each metric's definition is kept as a version with its assumptions named. The grace window is still an assumption to be confirmed; when it is, a new version is issued and the old numbers keep theirs." },
       { target: "whats-not", route: "/whats-not", as: "P02", title: "What this is not", body: "No composite score, no rank, no target except M&M attendance, no hand-entered outcomes. This page is shown at faculty meeting before anyone sees a peer comparison." },
-      { target: null, route: "/analyst", as: "P02", title: "That's the close", body: "Reconcile, check every cell, watch disputes, keep definitions versioned. The system survives its champion only if this runs every month without the builder." },
+      { target: null, route: "/analyst", as: "P02", title: "That's the close", body: "Reconcile, check every cell, keep definitions versioned. The system survives its champion only if this runs every month without the builder." },
     ],
   };
 
-  return { month, dispute, feedback, close };
+  const moreno = d.people.find((p) => p.id === "A01")!;
+  const app: TourDef = {
+    id: "app",
+    journey: "J1",
+    label: "A clinic provider's month",
+    persona: `${moreno.name}, spine clinic`,
+    blurb: "The same monthly scorecard for a nurse practitioner: clinic volume, notes, access and patient experience, compared only with other advanced practice providers.",
+    highlights: ["Only the measures that apply", "Compared with APPs, not surgeons", "Notes closed within 72 hours", "Their own patient feedback"],
+    accent: "violet",
+    enterAs: "A01",
+    steps: [
+      { target: null, route: "/me", as: "A01", title: "Not only surgeons", body: `You are ${moreno.name}, a nurse practitioner in the spine clinic at Main campus. The department publishes a scorecard for every advanced practice provider too, on the same day as the surgeons'.` },
+      { target: "me-header", route: "/me", as: "A01", title: "A provider scorecard", body: "The same stamp as every scorecard: who, which clinic and site, which month, and when the data was last refreshed." },
+      { target: "what-changed", route: "/me", as: "A01", title: "Her headline numbers", body: "For a clinic provider the headline is new patient visits, notes signed within 72 hours and the third-next available appointment, each against last month." },
+      { target: "section-volume", route: "/me", as: "A01", title: "Only what applies", body: "Operating-room, surgical outcome and M&M measures are left off, with a line saying so. Nothing is shown as zero or blank because it does not fit the role." },
+      { target: "metric-value", route: "/me/metric/notes_72h", as: "A01", title: "Notes within 72 hours", body: "The value with its count: how many of her clinic notes were signed within three days of the visit." },
+      { target: "metric-spread", route: "/me/metric/notes_72h", as: "A01", title: "Compared with her own group", body: "Her value among the other advanced practice providers in the department, unnamed. APPs are never placed among surgeons, whose clinics run differently." },
+      { target: "records-table", route: `/me/metric/notes_72h/records?period=${P}`, as: "A01", title: "The notes behind it", body: "Every visit counted, with the visit date and when the note was signed. The same list any clinician can download." },
+      { target: "inbox-intro", route: "/me/inbox", as: "A01", title: "Her patients' words", body: "Comments from her own patients, with the same privacy rules as every clinician: her direct leader reads each month 30 days later, and never her private notes." },
+      { target: null, route: "/me", as: "A01", title: "That's a provider's month", body: "One scorecard design for the whole department, with each clinician measured on what their role controls." },
+    ],
+  };
+
+  const chair = d.people.find((p) => p.id === "P01")!;
+  const dept: TourDef = {
+    id: "department",
+    journey: "J1",
+    label: "The department at a glance",
+    persona: `${chair.name}, department chair`,
+    blurb: "The chair's view: the department's month pooled across every clinician, each site's operations, the spread of practice and outcomes, with no clinician named or ranked.",
+    highlights: ["Pooled, never named", "Site operations in one place", "Spread without a league table", "Outcomes against expected"],
+    accent: "teal",
+    enterAs: "P01",
+    steps: [
+      { target: null, route: "/department", as: "P01", title: "The chair's month", body: `You are ${chair.name}, chair of neurosurgery. She does not need any one clinician's scorecard; she needs to know how the department and its sites are running.` },
+      { target: "dept-header", route: "/department", as: "P01", title: "The whole department", body: "Surgeons and advanced practice providers at both sites, for the month you pick. Every figure on this page is pooled; no clinician is named." },
+      { target: "dept-kpis", route: "/department", as: "P01", title: "The month, against the last twelve", body: "The handful of numbers a chair asks about first, each with its trend and the change from last month, and M&M attendance against the one target the department sets." },
+      { target: "dept-sites", route: "/department", as: "P01", title: "Measures that belong to a site", body: "OR turnover, PACU boarding and room-ready delays are driven by the building, not the surgeon, so they live here and never on an individual scorecard." },
+      { target: "dept-spread", route: "/department", as: "P01", title: "Spread, not a ranking", body: "Each dot is one clinician, unnamed and in no particular order. A wide spread is a question for the department to ask, not a list of names." },
+      { target: "dept-quality", route: "/department", as: "P01", title: "Outcomes against expected", body: "Length of stay, readmission and mortality as observed over expected, with their intervals. The reading only says better or higher than expected when the interval excludes 1.0." },
+      { target: "dept-experience", route: "/department", as: "P01", title: "Patient experience by group", body: "Surgeons and advanced practice providers side by side against the MGB average. Comments are never rolled up here." },
+      { target: null, route: "/department", as: "P01", title: "That's the department", body: "One page for the chair, built from the same records as every clinician's scorecard, so the two always agree." },
+    ],
+  };
+
+  return {
+    month,
+    app,
+    ...(DISPUTES_ENABLED ? { dispute } : {}),
+    feedback,
+    department: dept,
+    close,
+  };
 }
 
 export function tourStepUrl(route: string, tour: TourId, step: number): string {

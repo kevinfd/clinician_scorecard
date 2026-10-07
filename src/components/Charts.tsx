@@ -159,3 +159,35 @@ export function Responsive({ render }: { render: (W: number) => ReactNode }) {
     </>
   );
 }
+
+/** Spread of practice: one unlabeled dot per clinician and a median line. No "you", no names. */
+export function DistributionPlot({ values, median, fmt, title, W = 720 }: { values: number[]; median: number | null; fmt: (v: number) => string; title: string; W?: number }) {
+  if (!values.length) return null;
+  const H = 92;
+  const lo = Math.min(...values);
+  const hi = Math.max(...values);
+  const pad = (hi - lo) * 0.08 || 1;
+  const x = scale(lo - pad, hi + pad, 24, W - 24);
+  const axisY = 58;
+  const stacks = new Map<number, number>();
+  return (
+    <svg className="block h-auto w-full overflow-visible" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={title}>
+      <title>{title}</title>
+      <line x1={12} x2={W - 12} y1={axisY} y2={axisY} stroke={T.axis} strokeWidth={1.5} />
+      {median !== null ? (
+        <g>
+          <line x1={x(median)} x2={x(median)} y1={14} y2={axisY + 6} stroke={T.violet} strokeWidth={1.5} strokeDasharray="4 3" />
+          <text x={x(median)} y={10} textAnchor="middle" fontSize={12} fill={T.violet}>median {fmt(median)}</text>
+        </g>
+      ) : null}
+      {values.map((v, i) => {
+        const k = Math.round(x(v));
+        const n = stacks.get(k) ?? 0;
+        stacks.set(k, n + 1);
+        return <circle key={i} cx={k} cy={axisY - 9 - Math.min(n, 3) * 11} r={5} fill={T.tealSoft} stroke={T.teal} strokeWidth={1.5} />;
+      })}
+      <text x={x(lo)} y={axisY + 22} textAnchor="start" fontSize={12} fill={T.text}>{fmt(lo)}</text>
+      <text x={x(hi)} y={axisY + 22} textAnchor="end" fontSize={12} fill={T.text}>{fmt(hi)}</text>
+    </svg>
+  );
+}

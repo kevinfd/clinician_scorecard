@@ -1,13 +1,12 @@
 import { Ban, Database, EyeOff, Gauge, Layers, PenOff, Target } from "lucide-react";
 import { Shell } from "@/components/Shell";
 import { viewer } from "@/lib/session";
-import { DISPUTE_HOW } from "@/lib/disputes";
 
 const ITEMS = [
   { icon: Gauge, title: "Not a score or a rank", body: "There is no composite score and no ranking. Nothing here adds metrics together or orders surgeons." },
   { icon: Target, title: "Not a target, except one", body: "The only target is M&M attendance, 8 of 12 sessions per fiscal year, because the comp plan sets it. Work RVUs are compared with your own last year only." },
   { icon: EyeOff, title: "Not a way to see colleagues", body: "Peer comparisons are anonymous: the spread of your peers and where you sit in it, never who is who. A comparison needs at least five other surgeons who each have enough cases." },
-  { icon: Ban, title: "Not the last word on a record", body: `Every record is credited to exactly one clinician, and you can dispute any record credited to you. ${DISPUTE_HOW}` },
+  { icon: Ban, title: "Not a black box", body: "Every record is credited to exactly one clinician, and every number links to its definition and to the list of records behind it, so anyone can check where a number came from." },
   { icon: PenOff, title: "Not a place for hand-entered outcomes", body: "Complications come from the department's QI database. Nothing in this app lets anyone type an outcome in." },
   { icon: Layers, title: "Not your whole practice", body: "OR turnover time, PACU boarding and room-ready delays are not on your scorecard. A surgeon cannot move them alone, so they appear only on division and site views." },
   { icon: Database, title: "Not real data, here", body: "This deployment runs on a synthetic department. Every name, case and comment is invented. Real surgeon data belongs on the department's governed server." },

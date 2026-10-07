@@ -68,6 +68,8 @@ export interface MetricDef {
   riskAdjusted?: boolean; // O/E
   unadjusted?: boolean;
   version: string;
+  /** Which clinicians the metric applies to. Surgical measures and the faculty M&M target apply to surgeons only. */
+  appliesTo?: ("surgeon" | "app")[];
   compute?: (id: string, months: Period[], ctx: Ctx) => Computed;
   columns?: Column[];
   records?: (id: string, months: Period[], ctx: Ctx) => RecordRow[];
@@ -633,3 +635,14 @@ export const SECTION_SLUG: Record<number, string> = { 1: "volume", 2: "efficienc
 export const DIVISION_ONLY = ["OR turnover time", "PACU boarding", "Room-ready delays"];
 
 export type { Person };
+
+const SURGEON_ONLY = new Set([
+  "or_case_volume", "case_mix_index", "fcot", "duration_accuracy", "block_utilization", "same_day_cancel",
+  "los_oe", "readmit_oe", "mortality_oe", "return_or", "ssi", "vte", "csf_leak", "icu_return", "mm_attendance",
+]);
+for (const m of METRICS) m.appliesTo = SURGEON_ONLY.has(m.key) ? ["surgeon"] : ["surgeon", "app"];
+
+/** Does this metric belong on this person's scorecard? */
+export function appliesTo(def: MetricDef, p: { kind: string }): boolean {
+  return (def.appliesTo ?? ["surgeon"]).includes(p.kind as "surgeon" | "app");
+}

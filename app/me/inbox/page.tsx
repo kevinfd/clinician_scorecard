@@ -8,7 +8,7 @@ import { person } from "@/lib/synth";
 export default async function MyInbox({ searchParams }: { searchParams: Promise<{ saved?: string; deleted?: string; error?: string; on?: string }> }) {
   const v = await viewer();
   if (!v) return <Shell viewer={null}><SignInFirst /></Shell>;
-  if (!v.isSurgeon) return <Shell viewer={v}><NotAuthorized /></Shell>;
+  if (!v.isClinician) return <Shell viewer={v}><NotAuthorized /></Shell>;
   const flash = await searchParams;
   const { state, ov } = await live();
   const items = inboxItems(v, ov, false);

@@ -9,16 +9,20 @@ import { Logo } from "./Logo";
 import { IdentitySwitcher, type PersonOption } from "./IdentitySwitcher";
 import { PeriodPicker } from "./PeriodPicker";
 import { cn } from "@/lib/cn";
+import { DISPUTES_ENABLED } from "@/lib/features";
 
-type Section = "scorecard" | "inbox" | "disputes" | "queue" | "leader" | "analyst" | "definitions" | "whats-not" | "home";
+type Section = "department" | "scorecard" | "inbox" | "disputes" | "queue" | "leader" | "analyst" | "definitions" | "whats-not" | "home";
 
+const GROUP_ORDER = ["Clinicians", "Leadership", "Operations"];
+
+/** The demo cast shown in the identity switcher. Every other clinician exists only as an anonymous peer. */
 export function personOptions(): PersonOption[] {
-  return department().people.map((p) => ({
+  return department().people.filter((p) => p.featured).map((p) => ({
     id: p.id,
     name: p.name,
     sub: roleWords(p),
-    group: p.isSurgeon ? (p.roles.includes("chief") || p.roles.includes("leader") ? "Surgeons with a leadership role" : "Surgeons") : "Leadership and operations",
-  })).sort((a, b) => a.group.localeCompare(b.group) || 0);
+    group: p.roles.includes("chief") || p.roles.includes("chair") ? "Leadership" : p.isClinician ? "Clinicians" : "Operations",
+  })).sort((a, b) => GROUP_ORDER.indexOf(a.group) - GROUP_ORDER.indexOf(b.group));
 }
 
 export function Shell({
@@ -33,12 +37,13 @@ export function Shell({
   wide?: boolean;
 }) {
   const nav: { key: Section; href: string; label: string }[] = [];
-  if (viewer?.isSurgeon) {
-    nav.push({ key: "scorecard", href: "/me", label: "Scorecard" });
+  if (has(viewer, "chair") || has(viewer, "chief")) nav.push({ key: "department", href: "/department", label: "Department" });
+  if (viewer?.isClinician) {
+    nav.push({ key: "scorecard", href: "/me", label: has(viewer, "chief") ? "My scorecard" : "Scorecard" });
     nav.push({ key: "inbox", href: "/me/inbox", label: "Patient feedback" });
-    nav.push({ key: "disputes", href: "/disputes", label: "My disputes" });
+    if (DISPUTES_ENABLED) nav.push({ key: "disputes", href: "/disputes", label: "My disputes" });
   }
-  if (isAdjudicator(viewer)) nav.push({ key: "queue", href: "/queue", label: "Dispute queue" });
+  if (DISPUTES_ENABLED && isAdjudicator(viewer)) nav.push({ key: "queue", href: "/queue", label: "Dispute queue" });
   if (reportsOf(viewer).length) nav.push({ key: "leader", href: "/leader", label: "Direct reports" });
   if (has(viewer, "analyst")) nav.push({ key: "analyst", href: "/analyst", label: "Period close" });
   nav.push({ key: "definitions", href: "/definitions", label: "Definitions" });
@@ -107,7 +112,7 @@ export function Shell({
 
       <footer className="border-t border-slate-200 bg-white print-hide">
         <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-between gap-2 px-4 py-4 text-[12px] text-slate-400 sm:px-6">
-          <span>Clinician Scorecard · synthetic demonstration · {storageMode() === "browser" ? "disputes and notes are kept in this browser" : "disputes and notes are shared on this deployment"}</span>
+          <span>Clinician Scorecard · synthetic demonstration · {storageMode() === "browser" ? "notes are kept in this browser" : "notes are shared on this deployment"}</span>
           <span className="flex flex-wrap gap-4">
             <Link className="hover:text-slate-600" href="/whats-not">What this is not</Link>
             <Link className="hover:text-slate-600" href="/definitions">Definitions</Link>

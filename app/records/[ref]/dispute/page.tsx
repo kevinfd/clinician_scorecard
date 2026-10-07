@@ -1,3 +1,5 @@
+import { DISPUTES_ENABLED } from "@/lib/features";
+import { notFound } from "next/navigation";
 import { Shell, SignInFirst, NotAuthorized } from "@/components/Shell";
 import { DisputeForm } from "@/components/DisputeForm";
 import { Card, CardBody, CardHeader, LinkButton } from "@/components/ui";
@@ -9,6 +11,7 @@ import { longDate } from "@/lib/periods";
 import { metric } from "@/lib/metrics";
 
 export default async function DisputePage({ params, searchParams }: { params: Promise<{ ref: string }>; searchParams: Promise<{ metric?: string; period?: string }> }) {
+  if (!DISPUTES_ENABLED) notFound();
   const v = await viewer();
   if (!v) return <Shell viewer={null}><SignInFirst /></Shell>;
   const ref = decodeURIComponent((await params).ref);

@@ -1,5 +1,6 @@
 "use server";
 
+import { DISPUTES_ENABLED } from "@/lib/features";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -40,8 +41,8 @@ export async function signIn(formData: FormData) {
   if (process.env.DEMO_PASSCODE && jar.get(PASS_COOKIE)?.value !== passToken()) redirect("/");
   if (!p) redirect("/");
   jar.set(VIEWER_COOKIE, p.id, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 60 * 60 * 8 });
-  if (p.isSurgeon) redirect("/me");
-  if (p.roles.includes("chair")) redirect("/queue");
+  if (p.isClinician) redirect("/me");
+  if (p.roles.includes("chair")) redirect("/department");
   redirect("/analyst");
 }
 
@@ -67,6 +68,7 @@ export interface FormState {
 }
 
 export async function fileDispute(_prev: FormState, formData: FormData): Promise<FormState> {
+  if (!DISPUTES_ENABLED) return { errors: { form: "Disputes are not enabled in this demonstration." } };
   const v = await viewer();
   if (!v?.isSurgeon) return { errors: { form: "This action is not available to you." } };
   const ref = String(formData.get("ref") ?? "");
@@ -116,6 +118,7 @@ function storageError(e: unknown, values: Record<string, string>): FormState {
 }
 
 export async function decideDispute(_prev: FormState, formData: FormData): Promise<FormState> {
+  if (!DISPUTES_ENABLED) return { errors: { form: "Disputes are not enabled in this demonstration." } };
   const v = await viewer();
   const id = String(formData.get("id") ?? "");
   const decision = String(formData.get("decision") ?? "");
@@ -145,6 +148,7 @@ export async function decideDispute(_prev: FormState, formData: FormData): Promi
 }
 
 export async function withdrawDispute(formData: FormData) {
+  if (!DISPUTES_ENABLED) redirect("/");
   const v = await viewer();
   const id = String(formData.get("id") ?? "");
   const { state, disputes } = await live();
@@ -162,7 +166,7 @@ export async function saveNote(formData: FormData) {
   const v = await viewer();
   const surveyRef = String(formData.get("surveyRef") ?? "");
   const text = String(formData.get("text") ?? "").trim();
-  if (!v?.isSurgeon) redirect("/me/inbox");
+  if (!v?.isClinician) redirect("/me/inbox");
   if (!text) redirect(`/me/inbox?error=note-required&on=${surveyRef}#${surveyRef}`);
   const { state } = await live();
   state.notes = state.notes.filter((n) => !(n.surveyRef === surveyRef && n.authorId === v.id && n.deleted));

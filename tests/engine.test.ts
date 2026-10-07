@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { department, person } from "@/lib/synth";
-import { METRICS, metric } from "@/lib/metrics";
+import { appliesTo, METRICS, metric } from "@/lib/metrics";
 import { mmView, peerGroup, spreadFor, surveyView, tileFor, trendFor, windowFor, MIN_PEERS } from "@/lib/engine";
 import { overridesFrom, routeFor, type Dispute } from "@/lib/disputes";
 import { LATEST_PUBLISHED, publishedPeriods } from "@/lib/periods";
@@ -21,10 +21,10 @@ describe("synthetic department", () => {
 });
 
 describe("no blank cells (GR3)", () => {
-  it("every tile for every surgeon in every published period carries a value or a worded reason", () => {
+  it("every tile for every clinician in every published period carries a value or a worded reason", () => {
     for (const p of publishedPeriods()) {
-      for (const s of department().surgeons) {
-        for (const m of METRICS) {
+      for (const s of department().clinicians) {
+        for (const m of METRICS.filter((x) => appliesTo(x, s))) {
           const t = tileFor(m, s, p, none);
           if (t.kind === "value") expect(t.adjudicated!.line.length).toBeGreaterThan(0);
           else if (t.kind === "reason") expect(t.reason!.length).toBeGreaterThan(10);
@@ -32,6 +32,26 @@ describe("no blank cells (GR3)", () => {
         }
       }
     }
+  });
+});
+
+describe("advanced practice providers", () => {
+  it("are clinicians with clinic metrics only, never operating-room ones", () => {
+    const a = person("A01")!;
+    expect(a.kind).toBe("app");
+    expect(a.isClinician).toBe(true);
+    expect(appliesTo(metric("notes_72h")!, a)).toBe(true);
+    expect(appliesTo(metric("new_patient_visits")!, a)).toBe(true);
+    for (const k of ["or_case_volume", "fcot", "los_oe", "mm_attendance"]) expect(appliesTo(metric(k)!, a)).toBe(false);
+    expect(department().cases.some((c) => c.primaryId === a.id || c.cosurgeonId === a.id)).toBe(false);
+  });
+
+  it("are compared only with other APPs, and surgeons never with APPs", () => {
+    const a = person("A01")!;
+    const g = peerGroup(a, "site");
+    expect(g.members.length).toBeGreaterThanOrEqual(MIN_PEERS);
+    expect(g.members.every((m) => m.kind === "app")).toBe(true);
+    for (const s of department().surgeons) expect(peerGroup(s, "system").members.some((m) => m.kind === "app")).toBe(false);
   });
 });
 

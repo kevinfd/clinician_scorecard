@@ -1,3 +1,5 @@
+import { DISPUTES_ENABLED } from "@/lib/features";
+import { notFound } from "next/navigation";
 import { CalendarClock, CircleCheck, Route as RouteIcon, UserRound } from "lucide-react";
 import { Shell, SignInFirst, NotAuthorized } from "@/components/Shell";
 import { DecideForm } from "@/components/DecideForm";
@@ -11,6 +13,7 @@ import { person } from "@/lib/synth";
 import { withdrawDispute } from "../../actions";
 
 export default async function DisputeDetail({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ filed?: string }> }) {
+  if (!DISPUTES_ENABLED) notFound();
   const v = await viewer();
   if (!v) return <Shell viewer={null}><SignInFirst /></Shell>;
   const { id } = await params;

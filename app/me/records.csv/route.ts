@@ -1,6 +1,6 @@
 import { viewer } from "@/lib/session";
 import { live } from "@/lib/store";
-import { metric } from "@/lib/metrics";
+import { appliesTo, metric } from "@/lib/metrics";
 import { windowFor } from "@/lib/engine";
 import { normalizePeriod } from "@/lib/periods";
 
@@ -11,7 +11,7 @@ export async function GET(req: Request) {
   const v = await viewer();
   const url = new URL(req.url);
   const def = metric(url.searchParams.get("metric") ?? "");
-  if (!v?.isSurgeon || !def?.records || !def.columns) return new Response("This page is not available to you.", { status: 403 });
+  if (!v?.isClinician || !def?.records || !appliesTo(def, v) || !def.columns) return new Response("This page is not available to you.", { status: 403 });
   const period = normalizePeriod(url.searchParams.get("period"));
   const { ov } = await live();
   const win = windowFor(def, period);

@@ -6,6 +6,7 @@ import type { Note } from "@/lib/store";
 import type { OverrideMap } from "@/lib/disputes";
 import { saveNote, deleteNote, restoreNote } from "../../app/actions";
 import { btn } from "./ui";
+import { DISPUTES_ENABLED } from "@/lib/features";
 
 export const LEADER_GATE_DAYS = 30;
 
@@ -86,7 +87,7 @@ export function InboxList({
                     <form action={deleteNote} className="mt-2"><input type="hidden" name="surveyRef" value={s.ref} /><button className={btn("ghost", "sm")} type="submit">Delete note</button></form>
                   ) : null}
                 </details>
-                <p className="mt-2 text-[12px] text-slate-400">Not your patient? <Link className="text-slate-500 underline" href={`/records/${s.ref}/dispute?metric=feedback_inbox`}>Dispute who it is credited to</Link>. The comment itself cannot be disputed.</p>
+                {DISPUTES_ENABLED ? <p className="mt-2 text-[12px] text-slate-400">Not your patient? <Link className="text-slate-500 underline" href={`/records/${s.ref}/dispute?metric=feedback_inbox`}>Dispute who it is credited to</Link>. The comment itself cannot be disputed.</p> : null}
               </div>
             ) : null}
           </article>
